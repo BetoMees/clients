@@ -2,9 +2,13 @@ import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { Observable, switchMap } from "rxjs";
 
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToSingleOrganization,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 
 @Component({
   selector: "app-org-settings",
@@ -21,7 +25,11 @@ export class SettingsComponent implements OnInit {
 
   ngOnInit() {
     this.organization$ = this.route.params.pipe(
-      switchMap((params) => this.organizationService.get$(params.organizationId)),
+      switchMap((params) =>
+        this.organizationService
+          .organizations$(params.organizationId)
+          .pipe(mapToSingleOrganization(params.organizationId as OrganizationId)),
+      ),
     );
   }
 }

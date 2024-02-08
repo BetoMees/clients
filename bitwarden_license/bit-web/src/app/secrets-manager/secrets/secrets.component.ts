@@ -1,10 +1,14 @@
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { combineLatestWith, Observable, startWith, switchMap } from "rxjs";
+import { combineLatestWith, firstValueFrom, Observable, startWith, switchMap } from "rxjs";
 
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToSingleOrganization,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 import { DialogService } from "@bitwarden/components";
 
 import { SecretListView } from "../models/view/secret-list.view";
@@ -47,7 +51,13 @@ export class SecretsComponent implements OnInit {
       combineLatestWith(this.route.params),
       switchMap(async ([_, params]) => {
         this.organizationId = params.organizationId;
-        this.organizationEnabled = this.organizationService.get(params.organizationId)?.enabled;
+        this.organizationEnabled = (
+          await firstValueFrom(
+            this.organizationService
+              .organizations$()
+              .pipe(mapToSingleOrganization(params.organizationId as OrganizationId)),
+          )
+        )?.enabled;
 
         return await this.getSecrets();
       }),

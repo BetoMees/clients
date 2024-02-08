@@ -5,7 +5,10 @@ import { combineLatest, from, lastValueFrom, of, Subject, switchMap, takeUntil }
 
 import { ModalService } from "@bitwarden/angular/services/modal.service";
 import { OrganizationApiServiceAbstraction } from "@bitwarden/common/admin-console/abstractions/organization/organization-api.service.abstraction";
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToSingleOrganization,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { OrganizationCollectionManagementUpdateRequest } from "@bitwarden/common/admin-console/models/request/organization-collection-management-update.request";
 import { OrganizationKeysRequest } from "@bitwarden/common/admin-console/models/request/organization-keys.request";
 import { OrganizationUpdateRequest } from "@bitwarden/common/admin-console/models/request/organization-update.request";
@@ -16,6 +19,7 @@ import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.se
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 import { DialogService, SimpleDialogOptions } from "@bitwarden/components";
 
 import { ApiKeyComponent } from "../../../auth/settings/security/api-key.component";
@@ -103,7 +107,11 @@ export class AccountComponent {
 
     this.route.params
       .pipe(
-        switchMap((params) => this.organizationService.get$(params.organizationId)),
+        switchMap((params) =>
+          this.organizationService
+            .organizations$()
+            .pipe(mapToSingleOrganization(params.organizationId as OrganizationId)),
+        ),
         switchMap((organization) => {
           return combineLatest([
             of(organization),

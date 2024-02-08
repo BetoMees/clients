@@ -1,4 +1,5 @@
 import { ProductType } from "../../../enums/product-type.enum";
+import { OrganizationId } from "../../../types/guid";
 import { OrganizationUserStatusType, OrganizationUserType } from "../../enums";
 import { ORGANIZATIONS } from "../../services/organization/organization.service";
 
@@ -10,7 +11,7 @@ describe("ORGANIZATIONS state", () => {
   it("should deserialize JSON string to proper object", async () => {
     const expectedResult: Record<string, OrganizationData> = {
       "1": {
-        id: "id",
+        id: "id" as OrganizationId,
         name: "name",
         status: OrganizationUserStatusType.Invited,
         type: OrganizationUserType.Owner,

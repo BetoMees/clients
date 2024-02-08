@@ -1,7 +1,13 @@
 import { Component, Input, OnInit } from "@angular/core";
+import { firstValueFrom } from "rxjs";
 
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToBooleanHasAnyOrganizations,
+  mapToSingleOrganization,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 
 @Component({
   selector: "app-export-scope-callout",
@@ -34,7 +40,11 @@ export class ExportScopeCalloutComponent implements OnInit {
   ) {}
 
   async ngOnInit(): Promise<void> {
-    if (!this.organizationService.hasOrganizations()) {
+    if (
+      !(await firstValueFrom(
+        this.organizationService.organizations$().pipe(mapToBooleanHasAnyOrganizations()),
+      ))
+    ) {
       return;
     }
 
@@ -48,7 +58,13 @@ export class ExportScopeCalloutComponent implements OnInit {
         ? {
             title: "exportingOrganizationVaultTitle",
             description: "exportingOrganizationVaultDesc",
-            scopeIdentifier: this.organizationService.get(organizationId).name,
+            scopeIdentifier: (
+              await firstValueFrom(
+                this.organizationService
+                  .organizations$()
+                  .pipe(mapToSingleOrganization(organizationId as OrganizationId)),
+              )
+            ).name,
           }
         : {
             title: "exportingPersonalVaultTitle",

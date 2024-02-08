@@ -3,7 +3,10 @@ import { FormControl, FormGroup, Validators } from "@angular/forms";
 import { ActivatedRoute } from "@angular/router";
 import { firstValueFrom, Subject, switchMap, takeUntil } from "rxjs";
 
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToSingleOrganization,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { FileDownloadService } from "@bitwarden/common/platform/abstractions/file-download/file-download.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
@@ -49,7 +52,11 @@ export class SecretsManagerExportComponent implements OnInit, OnDestroy {
   async ngOnInit() {
     this.route.params
       .pipe(
-        switchMap(async (params) => await this.organizationService.get(params.organizationId)),
+        switchMap((params) =>
+          this.organizationService
+            .organizations$()
+            .pipe(mapToSingleOrganization(params.organizationId)),
+        ),
         takeUntil(this.destroy$),
       )
       .subscribe((organization) => {

@@ -4,7 +4,10 @@ import { Subject, firstValueFrom } from "rxjs";
 import { debounceTime, takeUntil } from "rxjs/operators";
 
 import { SearchService } from "@bitwarden/common/abstractions/search.service";
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToBooleanHasAnyOrganizations,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { AutofillSettingsServiceAbstraction } from "@bitwarden/common/autofill/services/autofill-settings.service";
 import { BroadcasterService } from "@bitwarden/common/platform/abstractions/broadcaster.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
@@ -256,7 +259,14 @@ export class CurrentTabComponent implements OnInit, OnDestroy {
     const otherTypes: CipherType[] = [];
     const dontShowCards = await this.stateService.getDontShowCardsCurrentTab();
     const dontShowIdentities = await this.stateService.getDontShowIdentitiesCurrentTab();
-    this.showOrganizations = this.organizationService.hasOrganizations();
+
+    this.organizationService
+      .organizations$()
+      .pipe(mapToBooleanHasAnyOrganizations(), takeUntil(this.destroy$))
+      .subscribe((hasOrgs) => {
+        this.showOrganizations = hasOrgs;
+      });
+
     if (!dontShowCards) {
       otherTypes.push(CipherType.Card);
     }

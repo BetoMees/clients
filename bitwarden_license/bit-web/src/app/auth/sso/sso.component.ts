@@ -7,12 +7,15 @@ import {
   Validators,
 } from "@angular/forms";
 import { ActivatedRoute } from "@angular/router";
-import { concatMap, Subject, takeUntil } from "rxjs";
+import { concatMap, firstValueFrom, Subject, takeUntil } from "rxjs";
 
 import { ControlsOf } from "@bitwarden/angular/types/controls-of";
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { OrganizationApiServiceAbstraction } from "@bitwarden/common/admin-console/abstractions/organization/organization-api.service.abstraction";
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToSingleOrganization,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import {
   MemberDecryptionType,
@@ -30,6 +33,7 @@ import { ConfigServiceAbstraction } from "@bitwarden/common/platform/abstraction
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 
 import { ssoTypeValidator } from "./sso-type.validator";
 
@@ -245,7 +249,11 @@ export class SsoComponent implements OnInit, OnDestroy {
   }
 
   async load() {
-    this.organization = await this.organizationService.get(this.organizationId);
+    this.organization = await firstValueFrom(
+      this.organizationService
+        .organizations$()
+        .pipe(mapToSingleOrganization(this.organizationId as OrganizationId)),
+    );
     const ssoSettings = await this.organizationApiService.getSso(this.organizationId);
     this.populateForm(ssoSettings);
 

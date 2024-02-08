@@ -1,9 +1,14 @@
 import { Component } from "@angular/core";
 import { FormBuilder } from "@angular/forms";
+import { firstValueFrom } from "rxjs";
 
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToSingleOrganization,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { PolicyType } from "@bitwarden/common/admin-console/enums";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 
 import { BasePolicy, BasePolicyComponent } from "./base-policy.component";
 
@@ -37,7 +42,11 @@ export class ResetPasswordPolicyComponent extends BasePolicyComponent {
 
   async ngOnInit() {
     super.ngOnInit();
-    const organization = await this.organizationService.get(this.policyResponse.organizationId);
+    const organization = await firstValueFrom(
+      this.organizationService
+        .organizations$()
+        .pipe(mapToSingleOrganization(this.policyResponse.organizationId as OrganizationId)),
+    );
     this.showKeyConnectorInfo = organization.keyConnectorEnabled;
   }
 }

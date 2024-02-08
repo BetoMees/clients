@@ -14,7 +14,10 @@ import {
 } from "rxjs";
 import { first } from "rxjs/operators";
 
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToSingleOrganization,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { OrganizationUserService } from "@bitwarden/common/admin-console/abstractions/organization-user/organization-user.service";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
@@ -22,6 +25,7 @@ import { ConfigServiceAbstraction } from "@bitwarden/common/platform/abstraction
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 import { CollectionService } from "@bitwarden/common/vault/abstractions/collection.service";
 import { CollectionResponse } from "@bitwarden/common/vault/models/response/collection.response";
 import { CollectionView } from "@bitwarden/common/vault/models/view/collection.view";
@@ -121,7 +125,7 @@ export class CollectionDialogComponent implements OnInit, OnDestroy {
       this.formGroup.controls.selectedOrg.valueChanges
         .pipe(takeUntil(this.destroy$))
         .subscribe((id) => this.loadOrg(id, this.params.collectionIds));
-      this.organizations$ = this.organizationService.organizations$.pipe(
+      this.organizations$ = this.organizationService.organizations$().pipe(
         first(),
         map((orgs) =>
           orgs
@@ -139,9 +143,12 @@ export class CollectionDialogComponent implements OnInit, OnDestroy {
   }
 
   async loadOrg(orgId: string, collectionIds: string[]) {
-    const organization$ = of(this.organizationService.get(orgId)).pipe(
-      shareReplay({ refCount: true, bufferSize: 1 }),
-    );
+    const organization$ = this.organizationService
+      .organizations$()
+      .pipe(
+        mapToSingleOrganization(orgId as OrganizationId),
+        shareReplay({ refCount: true, bufferSize: 1 }),
+      );
     const groups$ = organization$.pipe(
       switchMap((organization) => {
         if (!organization.useGroups) {

@@ -1,8 +1,12 @@
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { Subject, takeUntil } from "rxjs";
+import { Subject, takeUntil, concatMap } from "rxjs";
 
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToSingleOrganization,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 import { DialogService } from "@bitwarden/components";
 
 import {
@@ -34,10 +38,19 @@ export class NewMenuComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.route.params.pipe(takeUntil(this.destroy$)).subscribe((params: any) => {
-      this.organizationId = params.organizationId;
-      this.organizationEnabled = this.organizationService.get(params.organizationId)?.enabled;
-    });
+    this.route.params
+      .pipe(
+        concatMap((params) =>
+          this.organizationService
+            .organizations$()
+            .pipe(mapToSingleOrganization(params.organizationId as OrganizationId)),
+        ),
+        takeUntil(this.destroy$),
+      )
+      .subscribe((org) => {
+        this.organizationId = org.id;
+        this.organizationEnabled = org?.enabled;
+      });
   }
 
   ngOnDestroy(): void {

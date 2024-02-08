@@ -1,4 +1,5 @@
 import { Injectable } from "@angular/core";
+import { firstValueFrom } from "rxjs";
 
 import { OrganizationApiServiceAbstraction } from "@bitwarden/common/admin-console/abstractions/organization/organization-api.service.abstraction";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
@@ -129,7 +130,7 @@ export class OrganizationUserResetPasswordService {
       throw new Error("New user key is required for rotation.");
     }
 
-    const allOrgs = await this.organizationService.getAll();
+    const allOrgs = await firstValueFrom(this.organizationService.organizations$());
 
     if (!allOrgs) {
       return;

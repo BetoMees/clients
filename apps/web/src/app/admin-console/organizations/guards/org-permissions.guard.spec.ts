@@ -5,6 +5,7 @@ import {
   RouterStateSnapshot,
 } from "@angular/router";
 import { mock, MockProxy } from "jest-mock-extended";
+import { of } from "rxjs";
 
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { OrganizationUserType } from "@bitwarden/common/admin-console/enums";
@@ -57,19 +58,15 @@ describe("Organization Permissions Guard", () => {
   });
 
   it("blocks navigation if organization does not exist", async () => {
-    organizationService.get.mockReturnValue(null);
-
+    organizationService.organizations$.mockReturnValue(of(null));
     const actual = await organizationPermissionsGuard.canActivate(route, state);
-
     expect(actual).not.toBe(true);
   });
 
   it("permits navigation if no permissions are specified", async () => {
     const org = orgFactory();
-    organizationService.get.calledWith(org.id).mockReturnValue(org);
-
+    organizationService.organizations$.mockReturnValue(of([org]));
     const actual = await organizationPermissionsGuard.canActivate(route, state);
-
     expect(actual).toBe(true);
   });
 
@@ -81,7 +78,7 @@ describe("Organization Permissions Guard", () => {
     };
 
     const org = orgFactory();
-    organizationService.get.calledWith(org.id).mockReturnValue(org);
+    organizationService.organizations$.mockReturnValue(of([org]));
 
     const actual = await organizationPermissionsGuard.canActivate(route, state);
 
@@ -104,7 +101,7 @@ describe("Organization Permissions Guard", () => {
       });
 
       const org = orgFactory();
-      organizationService.get.calledWith(org.id).mockReturnValue(org);
+      organizationService.organizations$.mockReturnValue(of([org]));
 
       const actual = await organizationPermissionsGuard.canActivate(route, state);
 
@@ -124,7 +121,7 @@ describe("Organization Permissions Guard", () => {
         }),
       });
       const org = orgFactory();
-      organizationService.get.calledWith(org.id).mockReturnValue(org);
+      organizationService.organizations$.mockReturnValue(of([org]));
 
       const actual = await organizationPermissionsGuard.canActivate(route, state);
 
@@ -141,7 +138,7 @@ describe("Organization Permissions Guard", () => {
         type: OrganizationUserType.Admin,
         enabled: false,
       });
-      organizationService.get.calledWith(org.id).mockReturnValue(org);
+      organizationService.organizations$.mockReturnValue(of([org]));
 
       const actual = await organizationPermissionsGuard.canActivate(route, state);
 
@@ -153,7 +150,7 @@ describe("Organization Permissions Guard", () => {
         type: OrganizationUserType.Owner,
         enabled: false,
       });
-      organizationService.get.calledWith(org.id).mockReturnValue(org);
+      organizationService.organizations$.mockReturnValue(of([org]));
 
       const actual = await organizationPermissionsGuard.canActivate(route, state);
 

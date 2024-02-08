@@ -27,7 +27,7 @@ export class CipherReportComponent {
     protected passwordRepromptService: PasswordRepromptService,
     protected organizationService: OrganizationService,
   ) {
-    this.organizations$ = this.organizationService.organizations$;
+    this.organizations$ = this.organizationService.organizations$();
   }
 
   async load() {

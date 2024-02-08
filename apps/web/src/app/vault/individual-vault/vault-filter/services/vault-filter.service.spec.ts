@@ -13,7 +13,7 @@ import { PolicyType } from "@bitwarden/common/admin-console/enums";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
-import { UserId } from "@bitwarden/common/types/guid";
+import { UserId, OrganizationId } from "@bitwarden/common/types/guid";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { FolderService } from "@bitwarden/common/vault/abstractions/folder/folder.service.abstraction";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
@@ -52,7 +52,7 @@ describe("vault filter service", () => {
     organizations = new ReplaySubject<Organization[]>(1);
     folderViews = new ReplaySubject<FolderView[]>(1);
 
-    organizationService.memberOrganizations$ = organizations;
+    organizationService.organizations$.mockReturnValue(organizations);
     folderService.folderViews$ = folderViews;
 
     vaultFilterService = new VaultFilterService(
@@ -281,7 +281,7 @@ describe("vault filter service", () => {
 
   function createOrganization(id: string, name: string) {
     const org = new Organization();
-    org.id = id;
+    org.id = id as OrganizationId;
     org.name = name;
     org.identifier = name;
     org.isMember = true;

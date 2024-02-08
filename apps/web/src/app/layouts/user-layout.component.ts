@@ -1,10 +1,15 @@
 import { CommonModule } from "@angular/common";
 import { Component, NgZone, OnDestroy, OnInit } from "@angular/core";
 import { RouterModule } from "@angular/router";
+import { firstValueFrom } from "rxjs";
 
 import { JslibModule } from "@bitwarden/angular/jslib.module";
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToBooleanHasAnyOrganizations,
+  mapToExcludeOrganizationsWithoutFamilySponsorshipSupport,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { BroadcasterService } from "@bitwarden/common/platform/abstractions/broadcaster.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
@@ -74,7 +79,14 @@ export class UserLayoutComponent implements OnInit, OnDestroy {
     const premium = await this.stateService.getHasPremiumPersonally();
     const selfHosted = this.platformUtilsService.isSelfHost();
 
-    this.hasFamilySponsorshipAvailable = await this.organizationService.canManageSponsorships();
+    this.hasFamilySponsorshipAvailable = await firstValueFrom(
+      this.organizationService
+        .organizations$()
+        .pipe(
+          mapToExcludeOrganizationsWithoutFamilySponsorshipSupport(),
+          mapToBooleanHasAnyOrganizations(),
+        ),
+    );
     const hasPremiumFromOrg = await this.stateService.getHasPremiumFromOrganization();
     let billing = null;
     if (!selfHosted) {

@@ -1,12 +1,13 @@
 import { Jsonify } from "type-fest";
 
 import { ProductType } from "../../../enums";
+import { OrganizationId } from "../../../types/guid";
 import { OrganizationUserStatusType, OrganizationUserType, ProviderType } from "../../enums";
 import { PermissionsApi } from "../api/permissions.api";
 import { ProfileOrganizationResponse } from "../response/profile-organization.response";
 
 export class OrganizationData {
-  id: string;
+  id: OrganizationId;
   name: string;
   status: OrganizationUserStatusType;
   type: OrganizationUserType;

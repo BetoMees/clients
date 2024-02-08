@@ -1,13 +1,16 @@
 import { Injectable } from "@angular/core";
 import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot } from "@angular/router";
+import { firstValueFrom } from "rxjs";
 
 import {
   canAccessOrgAdmin,
+  mapToSingleOrganization,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.service.abstraction";
 
 @Injectable({
@@ -22,13 +25,20 @@ export class OrganizationPermissionsGuard implements CanActivate {
     private syncService: SyncService,
   ) {}
 
+  private async getOrg(organizationId: OrganizationId) {
+    return await firstValueFrom(
+      this.organizationService.organizations$().pipe(mapToSingleOrganization(organizationId)),
+    );
+  }
+
   async canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
     // TODO: We need to fix this issue once and for all.
     if ((await this.syncService.getLastSync()) == null) {
       await this.syncService.fullSync(false);
     }
 
-    const org = this.organizationService.get(route.params.organizationId);
+    const org = await this.getOrg(route.params.organizationId);
+
     if (org == null) {
       return this.router.createUrlTree(["/"]);
     }

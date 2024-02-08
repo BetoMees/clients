@@ -1,5 +1,5 @@
 import { mock, MockProxy } from "jest-mock-extended";
-import { BehaviorSubject, firstValueFrom } from "rxjs";
+import { BehaviorSubject, firstValueFrom, of } from "rxjs";
 
 import { OrganizationService } from "../../../admin-console/abstractions/organization/organization.service.abstraction";
 import { OrganizationUserStatusType, PolicyType } from "../../../admin-console/enums";
@@ -17,6 +17,7 @@ import { CryptoService } from "../../../platform/abstractions/crypto.service";
 import { EncryptService } from "../../../platform/abstractions/encrypt.service";
 import { ContainerService } from "../../../platform/services/container.service";
 import { StateService } from "../../../platform/services/state.service";
+import { OrganizationId, UserId } from "../../../types/guid";
 
 describe("PolicyService", () => {
   let policyService: PolicyService;
@@ -31,21 +32,23 @@ describe("PolicyService", () => {
   beforeEach(() => {
     stateService = mock<StateService>();
     organizationService = mock<OrganizationService>();
-    organizationService.getAll
-      .calledWith("user")
-      .mockResolvedValue([
-        new Organization(
-          organizationData(
-            "test-organization",
-            true,
-            true,
-            OrganizationUserStatusType.Accepted,
-            false,
+    organizationService.organizations$
+      .calledWith("user" as UserId)
+      .mockReturnValue(
+        of([
+          new Organization(
+            organizationData(
+              "test-organization",
+              true,
+              true,
+              OrganizationUserStatusType.Accepted,
+              false,
+            ),
           ),
-        ),
-      ]);
-    organizationService.getAll.calledWith(undefined).mockResolvedValue([]);
-    organizationService.getAll.calledWith(null).mockResolvedValue([]);
+        ]),
+      );
+    organizationService.organizations$.calledWith(undefined).mockReturnValue(of([]));
+    organizationService.organizations$.calledWith(null).mockReturnValue(of([]));
     activeAccount = new BehaviorSubject("123");
     activeAccountUnlocked = new BehaviorSubject(true);
     stateService.getDecryptedPolicies.calledWith({ userId: "user" }).mockResolvedValue(null);
@@ -403,7 +406,7 @@ describe("PolicyService", () => {
     managePolicies: boolean,
   ) {
     const organizationData = new OrganizationData({} as any, {} as any);
-    organizationData.id = id;
+    organizationData.id = id as OrganizationId;
     organizationData.enabled = enabled;
     organizationData.usePolicies = usePolicies;
     organizationData.status = status;

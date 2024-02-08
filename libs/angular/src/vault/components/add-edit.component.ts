@@ -1,11 +1,12 @@
 import { DatePipe } from "@angular/common";
 import { Directive, EventEmitter, Input, OnDestroy, OnInit, Output } from "@angular/core";
-import { concatMap, Observable, Subject, takeUntil } from "rxjs";
+import { concatMap, firstValueFrom, Observable, Subject, takeUntil } from "rxjs";
 
 import { AuditService } from "@bitwarden/common/abstractions/audit.service";
 import { EventCollectionService } from "@bitwarden/common/abstractions/event/event-collection.service";
 import {
-  isMember,
+  mapToExcludeSpecialOrganizations,
+  mapToSingleOrganization,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
@@ -21,6 +22,7 @@ import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/pl
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { SendApiService } from "@bitwarden/common/tools/send/services/send-api.service.abstraction";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { CollectionService } from "@bitwarden/common/vault/abstractions/collection.service";
 import { FolderService } from "@bitwarden/common/vault/abstractions/folder/folder.service.abstraction";
@@ -214,15 +216,14 @@ export class AddEditComponent implements OnInit, OnDestroy {
       this.ownershipOptions.push({ name: myEmail, value: null });
     }
 
-    const orgs = await this.organizationService.getAll();
-    orgs
-      .filter(isMember)
-      .sort(Utils.getSortFunction(this.i18nService, "name"))
-      .forEach((o) => {
-        if (o.enabled && o.status === OrganizationUserStatusType.Confirmed) {
-          this.ownershipOptions.push({ name: o.name, value: o.id });
-        }
-      });
+    const orgs = await firstValueFrom(
+      this.organizationService.organizations$().pipe(mapToExcludeSpecialOrganizations()),
+    );
+    orgs.sort(Utils.getSortFunction(this.i18nService, "name")).forEach((o) => {
+      if (o.enabled && o.status === OrganizationUserStatusType.Confirmed) {
+        this.ownershipOptions.push({ name: o.name, value: o.id });
+      }
+    });
     if (!this.allowPersonal && this.organizationId == undefined) {
       this.organizationId = this.defaultOwnerId;
     }
@@ -586,7 +587,11 @@ export class AddEditComponent implements OnInit, OnDestroy {
       this.collections = this.writeableCollections.filter(
         (c) => c.organizationId === this.cipher.organizationId,
       );
-      const org = await this.organizationService.get(this.cipher.organizationId);
+      const org = await firstValueFrom(
+        this.organizationService
+          .organizations$()
+          .pipe(mapToSingleOrganization(this.cipher.organizationId as OrganizationId)),
+      );
       if (org != null) {
         this.cipher.organizationUseTotp = org.useTotp;
       }

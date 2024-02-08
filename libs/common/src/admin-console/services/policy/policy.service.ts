@@ -1,8 +1,9 @@
-import { BehaviorSubject, concatMap, map, Observable, of } from "rxjs";
+import { BehaviorSubject, concatMap, firstValueFrom, map, Observable, of } from "rxjs";
 
 import { ListResponse } from "../../../models/response/list.response";
 import { StateService } from "../../../platform/abstractions/state.service";
 import { Utils } from "../../../platform/misc/utils";
+import { UserId } from "../../../types/guid";
 import { OrganizationService } from "../../abstractions/organization/organization.service.abstraction";
 import { InternalPolicyService as InternalPolicyServiceAbstraction } from "../../abstractions/policy/policy.service.abstraction";
 import { OrganizationUserStatusType, OrganizationUserType, PolicyType } from "../../enums";
@@ -280,7 +281,9 @@ export class PolicyService implements InternalPolicyServiceAbstraction {
     policyFilter?: (policy: Policy) => boolean,
     userId?: string,
   ) {
-    const organizations = await this.organizationService.getAll(userId);
+    const organizations = await firstValueFrom(
+      this.organizationService.organizations$(userId as UserId),
+    );
     const filteredPolicies = policies.filter(
       (p) => p.type === policyType && p.enabled && (policyFilter == null || policyFilter(p)),
     );

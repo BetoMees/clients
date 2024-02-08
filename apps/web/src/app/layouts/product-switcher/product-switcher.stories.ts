@@ -1,7 +1,7 @@
 import { Component, Directive, importProvidersFrom, Input } from "@angular/core";
 import { RouterModule } from "@angular/router";
 import { applicationConfig, Meta, moduleMetadata, Story } from "@storybook/angular";
-import { BehaviorSubject, firstValueFrom } from "rxjs";
+import { BehaviorSubject, firstValueFrom, of } from "rxjs";
 
 import { JslibModule } from "@bitwarden/angular/jslib.module";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
@@ -19,12 +19,11 @@ import { ProductSwitcherComponent } from "./product-switcher.component";
   selector: "[mockOrgs]",
 })
 class MockOrganizationService implements Partial<OrganizationService> {
-  private static _orgs = new BehaviorSubject<Organization[]>([]);
-  organizations$ = MockOrganizationService._orgs; // eslint-disable-line rxjs/no-exposed-subjects
-
   @Input()
-  set mockOrgs(orgs: Organization[]) {
-    this.organizations$.next(orgs);
+  mockOrgs: Organization[];
+
+  organizations$() {
+    return of(this.mockOrgs);
   }
 }
 

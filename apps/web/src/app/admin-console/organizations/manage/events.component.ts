@@ -1,10 +1,13 @@
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
-import { concatMap, Subject, takeUntil } from "rxjs";
+import { concatMap, firstValueFrom, Subject, takeUntil } from "rxjs";
 
 import { UserNamePipe } from "@bitwarden/angular/pipes/user-name.pipe";
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToSingleOrganization,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { OrganizationUserService } from "@bitwarden/common/admin-console/abstractions/organization-user/organization-user.service";
 import { ProviderService } from "@bitwarden/common/admin-console/abstractions/provider.service";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
@@ -14,6 +17,7 @@ import { FileDownloadService } from "@bitwarden/common/platform/abstractions/fil
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 
 import { EventService } from "../../../core";
 import { EventExportService } from "../../../tools/event-export";
@@ -66,7 +70,11 @@ export class EventsComponent extends BaseEventsComponent implements OnInit, OnDe
       .pipe(
         concatMap(async (params) => {
           this.organizationId = params.organizationId;
-          this.organization = await this.organizationService.get(this.organizationId);
+          this.organization = await firstValueFrom(
+            this.organizationService
+              .organizations$()
+              .pipe(mapToSingleOrganization(this.organizationId as OrganizationId)),
+          );
           if (this.organization == null || !this.organization.useEvents) {
             await this.router.navigate(["/organizations", this.organizationId]);
             return;

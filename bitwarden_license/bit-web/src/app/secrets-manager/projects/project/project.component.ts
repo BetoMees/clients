@@ -13,6 +13,7 @@ import {
 } from "rxjs";
 
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { DialogService } from "@bitwarden/components";
@@ -34,6 +35,7 @@ export class ProjectComponent implements OnInit, OnDestroy {
 
   private organizationId: string;
   private projectId: string;
+  private organizations: Organization[];
   private organizationEnabled: boolean;
   private destroy$ = new Subject<void>();
 
@@ -70,10 +72,17 @@ export class ProjectComponent implements OnInit, OnDestroy {
       }),
     );
 
+    this.organizationService
+      .organizations$()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((orgs) => {
+        this.organizations = orgs;
+      });
+
     this.route.params.pipe(takeUntil(this.destroy$)).subscribe((params) => {
       this.organizationId = params.organizationId;
       this.projectId = params.projectId;
-      this.organizationEnabled = this.organizationService.get(params.organizationId)?.enabled;
+      this.organizationEnabled = this.organizations[params.organizationId]?.enabled;
     });
   }
 

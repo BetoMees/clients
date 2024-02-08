@@ -1,12 +1,13 @@
 import { Jsonify } from "type-fest";
 
 import { ProductType } from "../../../enums";
+import { OrganizationId } from "../../../types/guid";
 import { OrganizationUserStatusType, OrganizationUserType, ProviderType } from "../../enums";
 import { PermissionsApi } from "../api/permissions.api";
 import { OrganizationData } from "../data/organization.data";
 
 export class Organization {
-  id: string;
+  id: OrganizationId;
   name: string;
   status: OrganizationUserStatusType;
 
@@ -318,6 +319,10 @@ export class Organization {
   get isFreeOrg() {
     // return true if organization needs to be upgraded from a free org
     return !this.useTotp;
+  }
+
+  get canManageSponsorships() {
+    return this.familySponsorshipAvailable || this.familySponsorshipFriendlyName !== null;
   }
 
   static fromJSON(json: Jsonify<Organization>) {

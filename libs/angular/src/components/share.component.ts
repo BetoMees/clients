@@ -1,7 +1,10 @@
 import { Directive, EventEmitter, Input, OnDestroy, OnInit, Output } from "@angular/core";
 import { firstValueFrom, map, Observable, Subject, takeUntil } from "rxjs";
 
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToExcludeSpecialOrganizations,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { OrganizationUserStatusType } from "@bitwarden/common/admin-console/enums";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
@@ -51,7 +54,8 @@ export class ShareComponent implements OnInit, OnDestroy {
     const allCollections = await this.collectionService.getAllDecrypted();
     this.writeableCollections = allCollections.map((c) => c).filter((c) => !c.readOnly);
 
-    this.organizations$ = this.organizationService.memberOrganizations$.pipe(
+    this.organizations$ = this.organizationService.organizations$().pipe(
+      mapToExcludeSpecialOrganizations(),
       map((orgs) => {
         return orgs
           .filter((o) => o.enabled && o.status === OrganizationUserStatusType.Confirmed)

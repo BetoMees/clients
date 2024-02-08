@@ -11,11 +11,12 @@ import {
   canAccessReportingTab,
   canAccessSettingsTab,
   canAccessVaultTab,
-  getOrganizationById,
+  mapToSingleOrganization,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 import { BannerModule, IconModule, LayoutComponent, NavigationModule } from "@bitwarden/components";
 
 import { PaymentMethodBannersComponent } from "../../../components/payment-method-banners/payment-method-banners.component";
@@ -62,9 +63,10 @@ export class OrganizationLayoutComponent implements OnInit, OnDestroy {
       .pipe<string>(map((p) => p.organizationId))
       .pipe(
         mergeMap((id) => {
-          return this.organizationService.organizations$
+          return this.organizationService
+            .organizations$()
             .pipe(takeUntil(this._destroy))
-            .pipe(getOrganizationById(id));
+            .pipe(mapToSingleOrganization(id as OrganizationId));
         }),
       );
 

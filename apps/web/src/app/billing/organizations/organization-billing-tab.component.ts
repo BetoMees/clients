@@ -2,7 +2,10 @@ import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { map, Observable, switchMap } from "rxjs";
 
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToSingleOrganization,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 
 @Component({
@@ -19,7 +22,11 @@ export class OrganizationBillingTabComponent implements OnInit {
 
   ngOnInit() {
     this.showPaymentAndHistory$ = this.route.params.pipe(
-      switchMap((params) => this.organizationService.get$(params.organizationId)),
+      switchMap((params) =>
+        this.organizationService
+          .organizations$()
+          .pipe(mapToSingleOrganization(params.organizationId)),
+      ),
       map(
         (org) =>
           !this.platformUtilsService.isSelfHost() &&

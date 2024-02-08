@@ -1,11 +1,17 @@
+import { firstValueFrom } from "rxjs";
+
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { EventCollectionService } from "@bitwarden/common/abstractions/event/event-collection.service";
 import { SearchService } from "@bitwarden/common/abstractions/search.service";
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToSingleOrganization,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { OrganizationUserService } from "@bitwarden/common/admin-console/abstractions/organization-user/organization-user.service";
 import { EventType } from "@bitwarden/common/enums";
 import { ListResponse as ApiListResponse } from "@bitwarden/common/models/response/list.response";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { CollectionService } from "@bitwarden/common/vault/abstractions/collection.service";
 import { FolderService } from "@bitwarden/common/vault/abstractions/folder/folder.service.abstraction";
@@ -180,7 +186,11 @@ export class ListCommand {
     if (!Utils.isGuid(options.organizationId)) {
       return Response.badRequest("`" + options.organizationId + "` is not a GUID.");
     }
-    const organization = await this.organizationService.getFromState(options.organizationId);
+    const organization = await firstValueFrom(
+      this.organizationService
+        .organizations$()
+        .pipe(mapToSingleOrganization(options.organizationId as OrganizationId)),
+    );
     if (organization == null) {
       return Response.error("Organization not found.");
     }
@@ -213,7 +223,11 @@ export class ListCommand {
     if (!Utils.isGuid(options.organizationId)) {
       return Response.badRequest("`" + options.organizationId + "` is not a GUID.");
     }
-    const organization = await this.organizationService.getFromState(options.organizationId);
+    const organization = await firstValueFrom(
+      this.organizationService
+        .organizations$()
+        .pipe(mapToSingleOrganization(options.organizationId as OrganizationId)),
+    );
     if (organization == null) {
       return Response.error("Organization not found.");
     }
@@ -239,7 +253,7 @@ export class ListCommand {
   }
 
   private async listOrganizations(options: Options) {
-    let organizations = await this.organizationService.getAll();
+    let organizations = await firstValueFrom(this.organizationService.organizations$());
 
     if (options.search != null && options.search.trim() !== "") {
       organizations = CliUtils.searchOrganizations(organizations, options.search);

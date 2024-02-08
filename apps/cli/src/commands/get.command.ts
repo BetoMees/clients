@@ -1,8 +1,13 @@
+import { firstValueFrom } from "rxjs";
+
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { AuditService } from "@bitwarden/common/abstractions/audit.service";
 import { EventCollectionService } from "@bitwarden/common/abstractions/event/event-collection.service";
 import { SearchService } from "@bitwarden/common/abstractions/search.service";
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToSingleOrganization,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { EventType } from "@bitwarden/common/enums";
 import { CardExport } from "@bitwarden/common/models/export/card.export";
@@ -20,6 +25,7 @@ import { StateService } from "@bitwarden/common/platform/abstractions/state.serv
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { EncString } from "@bitwarden/common/platform/models/domain/enc-string";
 import { SendType } from "@bitwarden/common/tools/send/enums/send-type";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { CollectionService } from "@bitwarden/common/vault/abstractions/collection.service";
 import { FolderService } from "@bitwarden/common/vault/abstractions/folder/folder.service.abstraction";
@@ -453,9 +459,13 @@ export class GetCommand extends DownloadCommand {
   private async getOrganization(id: string) {
     let org: Organization = null;
     if (Utils.isGuid(id)) {
-      org = await this.organizationService.getFromState(id);
+      org = await firstValueFrom(
+        this.organizationService
+          .organizations$()
+          .pipe(mapToSingleOrganization(id as OrganizationId)),
+      );
     } else if (id.trim() !== "") {
-      let orgs = await this.organizationService.getAll();
+      let orgs = await firstValueFrom(this.organizationService.organizations$());
       orgs = CliUtils.searchOrganizations(orgs, id);
       if (orgs.length > 1) {
         return Response.multipleResults(orgs.map((c) => c.id));

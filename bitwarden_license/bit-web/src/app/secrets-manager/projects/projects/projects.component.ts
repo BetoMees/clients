@@ -1,8 +1,18 @@
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { combineLatest, lastValueFrom, Observable, startWith, switchMap } from "rxjs";
+import {
+  combineLatest,
+  firstValueFrom,
+  lastValueFrom,
+  Observable,
+  startWith,
+  switchMap,
+} from "rxjs";
 
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToSingleOrganization,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { DialogService } from "@bitwarden/components";
 
 import { ProjectListView } from "../../models/view/project-list.view";
@@ -51,7 +61,13 @@ export class ProjectsComponent implements OnInit {
     ]).pipe(
       switchMap(async ([params]) => {
         this.organizationId = params.organizationId;
-        this.organizationEnabled = this.organizationService.get(params.organizationId)?.enabled;
+        this.organizationEnabled = (
+          await firstValueFrom(
+            this.organizationService
+              .organizations$()
+              .pipe(mapToSingleOrganization(params.organizationId)),
+          )
+        )?.enabled;
 
         return await this.getProjects();
       }),

@@ -11,12 +11,16 @@ import {
   switchMap,
 } from "rxjs";
 
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToExcludeSpecialOrganizations,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
 import { PolicyType } from "@bitwarden/common/admin-console/enums";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { ActiveUserState, StateProvider } from "@bitwarden/common/platform/state";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { FolderService } from "@bitwarden/common/vault/abstractions/folder/folder.service.abstraction";
 import { CipherType } from "@bitwarden/common/vault/enums";
@@ -40,8 +44,10 @@ const NestingDelimiter = "/";
 
 @Injectable()
 export class VaultFilterService implements VaultFilterServiceAbstraction {
-  organizationTree$: Observable<TreeNode<OrganizationFilter>> =
-    this.organizationService.memberOrganizations$.pipe(
+  organizationTree$: Observable<TreeNode<OrganizationFilter>> = this.organizationService
+    .organizations$()
+    .pipe(
+      mapToExcludeSpecialOrganizations(),
       switchMap((orgs) => this.buildOrganizationTree(orgs)),
     );
 
@@ -161,7 +167,7 @@ export class VaultFilterService implements VaultFilterServiceAbstraction {
 
   protected getOrganizationFilterMyVault(): TreeNode<OrganizationFilter> {
     const myVault = new Organization() as OrganizationFilter;
-    myVault.id = "MyVault";
+    myVault.id = "MyVault" as OrganizationId;
     myVault.icon = "bwi-user";
     myVault.enabled = true;
     myVault.hideOptions = true;

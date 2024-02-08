@@ -15,8 +15,9 @@ import { NavigationModule } from "@bitwarden/components";
   imports: [CommonModule, JslibModule, NavigationModule],
 })
 export class OrgSwitcherComponent {
-  protected organizations$: Observable<Organization[]> =
-    this.organizationService.organizations$.pipe(
+  protected organizations$: Observable<Organization[]> = this.organizationService
+    .organizations$()
+    .pipe(
       map((orgs) =>
         orgs.filter((org) => this.filter(org)).sort((a, b) => a.name.localeCompare(b.name)),
       ),

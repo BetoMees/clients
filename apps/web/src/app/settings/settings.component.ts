@@ -1,7 +1,12 @@
 import { Component, NgZone, OnDestroy, OnInit } from "@angular/core";
+import { firstValueFrom } from "rxjs";
 
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToBooleanHasAnyOrganizations,
+  mapToExcludeOrganizationsWithoutFamilySponsorshipSupport,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { TokenService } from "@bitwarden/common/auth/abstractions/token.service";
 import { BroadcasterService } from "@bitwarden/common/platform/abstractions/broadcaster.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
@@ -54,7 +59,14 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
   async load() {
     this.premium = await this.stateService.getHasPremiumPersonally();
-    this.hasFamilySponsorshipAvailable = await this.organizationService.canManageSponsorships();
+    this.hasFamilySponsorshipAvailable = await firstValueFrom(
+      this.organizationService
+        .organizations$()
+        .pipe(
+          mapToExcludeOrganizationsWithoutFamilySponsorshipSupport(),
+          mapToBooleanHasAnyOrganizations(),
+        ),
+    );
     const hasPremiumFromOrg = await this.stateService.getHasPremiumFromOrganization();
     let billing = null;
     if (!this.selfHosted) {

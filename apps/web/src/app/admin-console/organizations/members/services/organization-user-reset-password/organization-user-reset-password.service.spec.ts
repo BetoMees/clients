@@ -1,4 +1,5 @@
 import { mock, MockProxy } from "jest-mock-extended";
+import { of } from "rxjs";
 
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { OrganizationUserService } from "@bitwarden/common/admin-console/abstractions/organization-user/organization-user.service";
@@ -13,6 +14,7 @@ import { EncryptionType, KdfType } from "@bitwarden/common/platform/enums";
 import { EncString } from "@bitwarden/common/platform/models/domain/enc-string";
 import { SymmetricCryptoKey } from "@bitwarden/common/platform/models/domain/symmetric-crypto-key";
 import { CsprngArray } from "@bitwarden/common/types/csprng";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 import { UserKey, OrgKey, MasterKey } from "@bitwarden/common/types/key";
 
 import { OrganizationUserResetPasswordService } from "./organization-user-reset-password.service";
@@ -159,10 +161,9 @@ describe("OrganizationUserResetPasswordService", () => {
 
   describe("getRotatedKeys", () => {
     beforeEach(() => {
-      organizationService.getAll.mockResolvedValue([
-        createOrganization("1", "org1"),
-        createOrganization("2", "org2"),
-      ]);
+      organizationService.organizations$.mockReturnValue(
+        of([createOrganization("1", "org1"), createOrganization("2", "org2")]),
+      );
       organizationApiService.getKeys.mockResolvedValue(
         new OrganizationKeysResponse({
           privateKey: "test-private-key",
@@ -186,7 +187,7 @@ describe("OrganizationUserResetPasswordService", () => {
 
 function createOrganization(id: string, name: string) {
   const org = new Organization();
-  org.id = id;
+  org.id = id as OrganizationId;
   org.name = name;
   org.identifier = name;
   org.isMember = true;

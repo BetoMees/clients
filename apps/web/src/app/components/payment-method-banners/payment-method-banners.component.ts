@@ -5,6 +5,7 @@ import { OrganizationApiServiceAbstraction as OrganizationApiService } from "@bi
 import {
   canAccessAdmin,
   OrganizationService,
+  mapToExcludeSpecialOrganizations,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { BillingBannerServiceAbstraction } from "@bitwarden/common/billing/abstractions/billing-banner.service.abstraction";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
@@ -32,9 +33,9 @@ export class PaymentMethodBannersComponent {
     private organizationApiService: OrganizationApiService,
   ) {}
 
-  private organizations$ = this.organizationService.memberOrganizations$.pipe(
-    canAccessAdmin(this.i18nService),
-  );
+  private organizations$ = this.organizationService
+    .organizations$()
+    .pipe(mapToExcludeSpecialOrganizations(), canAccessAdmin(this.i18nService));
 
   protected banners$: Observable<PaymentMethodBannerData[]> = combineLatest([
     this.organizations$,

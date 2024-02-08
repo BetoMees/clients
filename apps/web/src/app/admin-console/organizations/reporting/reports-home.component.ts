@@ -1,9 +1,13 @@
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute, NavigationEnd, Router } from "@angular/router";
-import { filter, map, Observable, startWith } from "rxjs";
+import { filter, map, Observable, startWith, concatMap, firstValueFrom } from "rxjs";
 
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToSingleOrganization,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 
 import { ReportVariant, reports, ReportType, ReportEntry } from "../../../tools/reports";
 
@@ -30,7 +34,14 @@ export class ReportsHomeComponent implements OnInit {
     );
 
     this.reports$ = this.route.params.pipe(
-      map((params) => this.organizationService.get(params.organizationId)),
+      concatMap(
+        async (params) =>
+          await firstValueFrom(
+            this.organizationService
+              .organizations$()
+              .pipe(mapToSingleOrganization(params.organizationId as OrganizationId)),
+          ),
+      ),
       map((org) => this.buildReports(org.isFreeOrg)),
     );
   }

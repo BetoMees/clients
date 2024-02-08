@@ -85,7 +85,7 @@ export class ClientsComponent implements OnInit {
     this.clients = response.data != null && response.data.length > 0 ? response.data : [];
     this.manageOrganizations =
       (await this.providerService.get(this.providerId)).type === ProviderUserType.ProviderAdmin;
-    const candidateOrgs = (await this.organizationService.getAll()).filter(
+    const candidateOrgs = (await firstValueFrom(this.organizationService.organizations$())).filter(
       (o) => o.isOwner && o.providerId == null,
     );
     const allowedOrgsIds = await Promise.all(

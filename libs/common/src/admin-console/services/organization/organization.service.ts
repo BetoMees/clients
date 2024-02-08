@@ -1,15 +1,18 @@
-import { BehaviorSubject, concatMap, map, Observable } from "rxjs";
+import { map, Observable } from "rxjs";
 import { Jsonify } from "type-fest";
 
-import { StateService } from "../../../platform/abstractions/state.service";
 import { KeyDefinition, ORGANIZATIONS_DISK, StateProvider } from "../../../platform/state";
-import {
-  InternalOrganizationServiceAbstraction,
-  isMember,
-} from "../../abstractions/organization/organization.service.abstraction";
+import { UserId } from "../../../types/guid";
+import { InternalOrganizationServiceAbstraction } from "../../abstractions/organization/organization.service.abstraction";
 import { OrganizationData } from "../../models/data/organization.data";
 import { Organization } from "../../models/domain/organization";
 
+/**
+ * The `KeyDefinition` for accessing organization lists in application state.
+ * @todo Ideally this wouldn't require a `fromJSON()` call, but `OrganizationData`
+ * has some properties that contain functions. This should probably get
+ * cleaned up.
+ */
 export const ORGANIZATIONS = KeyDefinition.record<OrganizationData>(
   ORGANIZATIONS_DISK,
   "organizations",
@@ -19,122 +22,49 @@ export const ORGANIZATIONS = KeyDefinition.record<OrganizationData>(
 );
 
 export class OrganizationService implements InternalOrganizationServiceAbstraction {
-  // marked for removal during AC-2009
-  protected _organizations = new BehaviorSubject<Organization[]>([]);
-  // marked for removal during AC-2009
-  organizations$ = this._organizations.asObservable();
-  // marked for removal during AC-2009
-  memberOrganizations$ = this.organizations$.pipe(map((orgs) => orgs.filter(isMember)));
+  constructor(private stateProvider: StateProvider) {}
 
-  activeUserOrganizations$: Observable<Organization[]>;
-  activeUserMemberOrganizations$: Observable<Organization[]>;
-
-  constructor(
-    private stateService: StateService,
-    private stateProvider: StateProvider,
-  ) {
-    this.activeUserOrganizations$ = this.stateProvider
-      .getActive(ORGANIZATIONS)
-      .state$.pipe(map((data) => Object.values(data).map((o) => new Organization(o))));
-
-    this.activeUserMemberOrganizations$ = this.activeUserOrganizations$.pipe(
-      map((orgs) => orgs.filter(isMember)),
-    );
-
-    this.stateService.activeAccountUnlocked$
-      .pipe(
-        concatMap(async (unlocked) => {
-          if (!unlocked) {
-            this._organizations.next([]);
-            return;
-          }
-
-          const data = await this.stateService.getOrganizations();
-          this.updateObservables(data);
-        }),
-      )
-      .subscribe();
+  organizations$(userId?: UserId): Observable<Organization[] | undefined> {
+    return this.stateFor(userId).state$.pipe(this.mapOrganizationRecordToArray());
   }
 
-  get$(id: string): Observable<Organization | undefined> {
-    return this.organizations$.pipe(map((orgs) => orgs.find((o) => o.id === id)));
+  async upsert(organization: OrganizationData, userId?: UserId): Promise<void> {
+    await this.stateFor(userId).update((existingOrganizations) => {
+      const organizations = existingOrganizations ?? {};
+      organizations[organization.id] = organization;
+      return organizations;
+    });
   }
 
-  async getAll(userId?: string): Promise<Organization[]> {
-    const organizationsMap = await this.stateService.getOrganizations({ userId: userId });
-    return Object.values(organizationsMap || {}).map((o) => new Organization(o));
-  }
-
-  async canManageSponsorships(): Promise<boolean> {
-    const organizations = this._organizations.getValue();
-    return organizations.some(
-      (o) => o.familySponsorshipAvailable || o.familySponsorshipFriendlyName !== null,
-    );
-  }
-
-  hasOrganizations(): boolean {
-    const organizations = this._organizations.getValue();
-    return organizations.length > 0;
-  }
-
-  async upsert(organization: OrganizationData): Promise<void> {
-    let organizations = await this.stateService.getOrganizations();
-    if (organizations == null) {
-      organizations = {};
-    }
-
-    organizations[organization.id] = organization;
-
-    await this.replace(organizations);
-  }
-
-  async delete(id: string): Promise<void> {
-    const organizations = await this.stateService.getOrganizations();
-    if (organizations == null) {
-      return;
-    }
-
-    if (organizations[id] == null) {
-      return;
-    }
-
-    delete organizations[id];
-    await this.replace(organizations);
-  }
-
-  get(id: string): Organization {
-    const organizations = this._organizations.getValue();
-
-    return organizations.find((organization) => organization.id === id);
+  async replace(organizations: { [id: string]: OrganizationData }, userId?: UserId): Promise<void> {
+    await this.stateFor(userId).update(() => {
+      return organizations;
+    });
   }
 
   /**
-   * @deprecated For the CLI only
-   * @param id id of the organization
+   * Accepts a record of `OrganizationData`, which is how we store the
+   * organization list as a JSON object on disk, to an array of
+   * `Organization`, which is how the data is published to callers of the
+   * service.
+   * @returns a function that can be used to pipe organization data from
+   * stored state to an exposed object easily consumable by others.
    */
-  async getFromState(id: string): Promise<Organization> {
-    const organizationsMap = await this.stateService.getOrganizations();
-    const organization = organizationsMap[id];
-    if (organization == null) {
-      return null;
-    }
-
-    return new Organization(organization);
+  private mapOrganizationRecordToArray() {
+    return map<Record<string, OrganizationData>, Organization[]>((orgs) =>
+      Object.values(orgs ?? {})?.map((o) => new Organization(o)),
+    );
   }
 
-  getByIdentifier(identifier: string): Organization {
-    const organizations = this._organizations.getValue();
-
-    return organizations.find((organization) => organization.identifier === identifier);
-  }
-
-  async replace(organizations: { [id: string]: OrganizationData }) {
-    await this.stateService.setOrganizations(organizations);
-    this.updateObservables(organizations);
-  }
-
-  private updateObservables(organizationsMap: { [id: string]: OrganizationData }) {
-    const organizations = Object.values(organizationsMap || {}).map((o) => new Organization(o));
-    this._organizations.next(organizations);
+  /**
+   * Fetches the organization list from on disk state for the specified user.
+   * @param userId the user ID to fetch the organization list for. Defaults to
+   * the currently active user.
+   * @returns an observable of organization state as it is stored on disk.
+   */
+  private stateFor(userId?: UserId) {
+    return userId
+      ? this.stateProvider.getUser(userId, ORGANIZATIONS)
+      : this.stateProvider.getActive(ORGANIZATIONS);
   }
 }

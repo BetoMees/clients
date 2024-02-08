@@ -1,6 +1,11 @@
 import { Injectable } from "@angular/core";
+import { firstValueFrom } from "rxjs";
 
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToSingleOrganization,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 
 import { ApItemValueType } from "./models/ap-item-value.type";
 import { ApItemViewType } from "./models/ap-item-view.type";
@@ -17,7 +22,11 @@ export class AccessPolicySelectorService {
     organizationId: string,
     selectedPoliciesValues: ApItemValueType[],
   ): Promise<boolean> {
-    const organization = this.organizationService.get(organizationId);
+    const organization = await firstValueFrom(
+      this.organizationService
+        .organizations$()
+        .pipe(mapToSingleOrganization(organizationId as OrganizationId)),
+    );
     if (organization.isOwner || organization.isAdmin) {
       return false;
     }

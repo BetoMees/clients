@@ -4,7 +4,10 @@ import { concatMap, firstValueFrom, lastValueFrom, Observable, Subject, takeUnti
 
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { OrganizationApiServiceAbstraction } from "@bitwarden/common/admin-console/abstractions/organization/organization-api.service.abstraction";
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToSingleOrganization,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { OrganizationApiKeyType } from "@bitwarden/common/admin-console/enums";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { PlanType } from "@bitwarden/common/billing/enums";
@@ -16,6 +19,7 @@ import { ConfigServiceAbstraction as ConfigService } from "@bitwarden/common/pla
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 import { DialogService } from "@bitwarden/components";
 
 import {
@@ -94,7 +98,15 @@ export class OrganizationSubscriptionCloudComponent implements OnInit, OnDestroy
       return;
     }
     this.loading = true;
-    this.userOrg = this.organizationService.get(this.organizationId);
+    this.organizationService
+      .organizations$()
+      .pipe(
+        mapToSingleOrganization(this.organizationId as OrganizationId),
+        takeUntil(this.destroy$),
+      )
+      .subscribe((org) => {
+        this.userOrg = org;
+      });
     if (this.userOrg.canViewSubscription) {
       this.sub = await this.organizationApiService.getSubscription(this.organizationId);
       this.lineItems = this.sub?.subscription?.items;

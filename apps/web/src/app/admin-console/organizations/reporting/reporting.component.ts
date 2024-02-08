@@ -2,8 +2,12 @@ import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { map, Observable, shareReplay, startWith, switchMap } from "rxjs";
 
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToSingleOrganization,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 
 @Component({
   selector: "app-org-reporting",
@@ -20,7 +24,11 @@ export class ReportingComponent implements OnInit {
 
   ngOnInit() {
     this.organization$ = this.route.params.pipe(
-      switchMap((params) => this.organizationService.get$(params.organizationId)),
+      switchMap((params) =>
+        this.organizationService
+          .organizations$()
+          .pipe(mapToSingleOrganization(params.organizationId as OrganizationId)),
+      ),
       shareReplay({ refCount: true, bufferSize: 1 }),
     );
 

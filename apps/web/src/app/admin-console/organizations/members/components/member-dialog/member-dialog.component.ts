@@ -3,7 +3,10 @@ import { Component, Inject, OnDestroy, OnInit } from "@angular/core";
 import { FormBuilder, Validators } from "@angular/forms";
 import { combineLatest, of, shareReplay, Subject, switchMap, takeUntil } from "rxjs";
 
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToSingleOrganization,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { OrganizationUserService } from "@bitwarden/common/admin-console/abstractions/organization-user/organization-user.service";
 import {
   OrganizationUserStatusType,
@@ -15,6 +18,7 @@ import { ProductType } from "@bitwarden/common/enums";
 import { ConfigServiceAbstraction } from "@bitwarden/common/platform/abstractions/config/config.service.abstraction";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 import { CollectionView } from "@bitwarden/common/vault/models/view/collection.view";
 import { DialogService } from "@bitwarden/components";
 
@@ -145,11 +149,16 @@ export class MemberDialogComponent implements OnInit, OnDestroy {
     this.editMode = this.params.organizationUserId != null;
     this.tabIndex = this.params.initialTab ?? MemberDialogTab.Role;
     this.title = this.i18nService.t(this.editMode ? "editMember" : "inviteMember");
+    const organizationId = this.params.organizationId as OrganizationId;
 
-    const organization$ = of(this.organizationService.get(this.params.organizationId)).pipe(
-      shareReplay({ refCount: true, bufferSize: 1 }),
-    );
-    const groups$ = organization$.pipe(
+    const organization$ = this.organizationService
+      .organizations$()
+      .pipe(
+        mapToSingleOrganization(organizationId),
+        shareReplay({ refCount: true, bufferSize: 1 }),
+      );
+    const groups$ = this.organizationService.organizations$().pipe(
+      mapToSingleOrganization(organizationId),
       switchMap((organization) => {
         if (!organization.useGroups) {
           return of([] as GroupView[]);

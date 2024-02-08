@@ -3,10 +3,14 @@ import { Component, Inject, OnInit } from "@angular/core";
 import { FormControl, FormGroup, Validators } from "@angular/forms";
 import { lastValueFrom, Subject, takeUntil } from "rxjs";
 
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToSingleOrganization,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 import { DialogService, BitValidators } from "@bitwarden/components";
 
 import { ProjectListView } from "../../models/view/project-list.view";
@@ -87,10 +91,18 @@ export class SecretDialogComponent implements OnInit {
       this.formGroup.get("project").setValue(this.data.projectId);
     }
 
-    if (this.organizationService.get(this.data.organizationId)?.isAdmin) {
-      this.formGroup.get("project").removeValidators(Validators.required);
-      this.formGroup.get("project").updateValueAndValidity();
-    }
+    this.organizationService
+      .organizations$()
+      .pipe(
+        mapToSingleOrganization(this.data.organizationId as OrganizationId),
+        takeUntil(this.destroy$),
+      )
+      .subscribe((org) => {
+        if (org?.isAdmin) {
+          this.formGroup.get("project").removeValidators(Validators.required);
+          this.formGroup.get("project").updateValueAndValidity();
+        }
+      });
   }
 
   async loadData() {

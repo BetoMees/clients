@@ -4,8 +4,10 @@ import { firstValueFrom } from "rxjs";
 
 import {
   canAccessVaultTab,
+  mapToSingleOrganization,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 import { ImportCollectionServiceAbstraction } from "@bitwarden/importer/core";
 import { ImportComponent } from "@bitwarden/importer/ui";
 
@@ -44,7 +46,11 @@ export class OrgImportComponent implements OnInit {
    * Callback that is called after a successful import.
    */
   protected async onSuccessfulImport(organizationId: string): Promise<void> {
-    const organization = await firstValueFrom(this.organizationService.get$(organizationId));
+    const organization = await firstValueFrom(
+      this.organizationService
+        .organizations$()
+        .pipe(mapToSingleOrganization(organizationId as OrganizationId)),
+    );
     if (organization == null) {
       return;
     }

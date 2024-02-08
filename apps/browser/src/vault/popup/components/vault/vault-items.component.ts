@@ -1,12 +1,16 @@
 import { Location } from "@angular/common";
 import { ChangeDetectorRef, Component, NgZone, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
-import { first } from "rxjs/operators";
+import { Subject } from "rxjs";
+import { first, takeUntil } from "rxjs/operators";
 
 import { VaultItemsComponent as BaseVaultItemsComponent } from "@bitwarden/angular/vault/components/vault-items.component";
 import { VaultFilter } from "@bitwarden/angular/vault/vault-filter/models/vault-filter.model";
 import { SearchService } from "@bitwarden/common/abstractions/search.service";
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToBooleanHasAnyOrganizations,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { BroadcasterService } from "@bitwarden/common/platform/abstractions/broadcaster.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
@@ -49,6 +53,7 @@ export class VaultItemsComponent extends BaseVaultItemsComponent implements OnIn
   private preventSelected = false;
   private applySavedState = true;
   private scrollingContainer = "cdk-virtual-scroll-viewport";
+  private componentDestroyed$: Subject<void> = new Subject();
 
   constructor(
     searchService: SearchService,
@@ -74,7 +79,12 @@ export class VaultItemsComponent extends BaseVaultItemsComponent implements OnIn
 
   async ngOnInit() {
     this.searchTypeSearch = !this.platformUtilsService.isSafari();
-    this.showOrganizations = this.organizationService.hasOrganizations();
+    this.organizationService
+      .organizations$()
+      .pipe(mapToBooleanHasAnyOrganizations(), takeUntil(this.componentDestroyed$))
+      .subscribe((hasOrgs) => {
+        this.showOrganizations = hasOrgs;
+      });
     this.vaultFilter = this.vaultFilterService.getVaultFilter();
     // eslint-disable-next-line rxjs-angular/prefer-takeuntil, rxjs/no-async-subscribe
     this.route.queryParams.pipe(first()).subscribe(async (params) => {
@@ -190,6 +200,9 @@ export class VaultItemsComponent extends BaseVaultItemsComponent implements OnIn
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     this.saveState();
     this.broadcasterService.unsubscribe(ComponentId);
+
+    this.componentDestroyed$.next();
+    this.componentDestroyed$.complete();
   }
 
   selectCipher(cipher: CipherView) {

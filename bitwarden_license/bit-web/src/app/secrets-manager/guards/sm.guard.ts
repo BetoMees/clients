@@ -5,6 +5,7 @@ import {
   createUrlTreeFromSnapshot,
   RouterStateSnapshot,
 } from "@angular/router";
+import { firstValueFrom } from "rxjs";
 
 import { AuthGuard } from "@bitwarden/angular/auth/guards";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
@@ -33,7 +34,7 @@ export const canActivateSM: CanActivateFn = async (
     return authGuard.canActivate(route, state);
   }
 
-  const orgs = await orgService.getAll();
+  const orgs = await firstValueFrom(orgService.organizations$());
   const smOrg = orgs.find((o) => o.canAccessSecretsManager);
   if (smOrg) {
     return createUrlTreeFromSnapshot(route, ["/sm", smOrg.id]);

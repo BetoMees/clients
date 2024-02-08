@@ -1,8 +1,12 @@
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { combineLatest, Observable, startWith, switchMap } from "rxjs";
+import { combineLatest, firstValueFrom, Observable, startWith, switchMap } from "rxjs";
 
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToSingleOrganization,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 import { DialogService } from "@bitwarden/components";
 
 import {
@@ -46,7 +50,13 @@ export class ServiceAccountsComponent implements OnInit {
     ]).pipe(
       switchMap(async ([params]) => {
         this.organizationId = params.organizationId;
-        this.organizationEnabled = this.organizationService.get(params.organizationId)?.enabled;
+        this.organizationEnabled = (
+          await firstValueFrom(
+            this.organizationService
+              .organizations$()
+              .pipe(mapToSingleOrganization(params.organizationId as OrganizationId)),
+          )
+        )?.enabled;
 
         return await this.getServiceAccounts();
       }),

@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { firstValueFrom, from, map, mergeMap, Observable } from "rxjs";
 
 import {
-  isMember,
+  mapToExcludeSpecialOrganizations,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
@@ -49,12 +49,9 @@ export class VaultFilterService implements DeprecatedVaultFilterServiceAbstracti
   }
 
   async buildOrganizations(): Promise<Organization[]> {
-    let organizations = await this.organizationService.getAll();
-    if (organizations != null) {
-      organizations = organizations.filter(isMember).sort((a, b) => a.name.localeCompare(b.name));
-    }
-
-    return organizations;
+    return firstValueFrom(
+      this.organizationService.organizations$().pipe(mapToExcludeSpecialOrganizations()),
+    );
   }
 
   buildNestedFolders(organizationId?: string): Observable<DynamicTreeNode<FolderView>> {

@@ -20,7 +20,10 @@ import { ModalService } from "@bitwarden/angular/services/modal.service";
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { SearchService } from "@bitwarden/common/abstractions/search.service";
 import { OrganizationApiServiceAbstraction } from "@bitwarden/common/admin-console/abstractions/organization/organization-api.service.abstraction";
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToSingleOrganization,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { OrganizationUserService } from "@bitwarden/common/admin-console/abstractions/organization-user/organization-user.service";
 import { OrganizationUserConfirmRequest } from "@bitwarden/common/admin-console/abstractions/organization-user/requests";
 import {
@@ -44,6 +47,7 @@ import { LogService } from "@bitwarden/common/platform/abstractions/log.service"
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
 import { ValidationService } from "@bitwarden/common/platform/abstractions/validation.service";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 import { CollectionService } from "@bitwarden/common/vault/abstractions/collection.service";
 import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.service.abstraction";
 import { CollectionData } from "@bitwarden/common/vault/models/data/collection.data";
@@ -143,7 +147,11 @@ export class PeopleComponent
 
   async ngOnInit() {
     const organization$ = this.route.params.pipe(
-      map((params) => this.organizationService.get(params.organizationId)),
+      concatMap((params) =>
+        this.organizationService
+          .organizations$()
+          .pipe(mapToSingleOrganization(params.organizationId as OrganizationId)),
+      ),
       shareReplay({ refCount: true, bufferSize: 1 }),
     );
 

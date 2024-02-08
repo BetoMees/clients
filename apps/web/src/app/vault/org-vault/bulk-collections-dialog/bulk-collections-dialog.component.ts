@@ -3,11 +3,15 @@ import { Component, Inject, OnDestroy } from "@angular/core";
 import { FormBuilder } from "@angular/forms";
 import { combineLatest, map, of, Subject, switchMap, takeUntil } from "rxjs";
 
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToSingleOrganization,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { OrganizationUserService } from "@bitwarden/common/admin-console/abstractions/organization-user/organization-user.service";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 import { CollectionView } from "@bitwarden/common/vault/models/view/collection.view";
 import { DialogService } from "@bitwarden/components";
 
@@ -43,7 +47,8 @@ export enum BulkCollectionsDialogResult {
 })
 export class BulkCollectionsDialogComponent implements OnDestroy {
   protected flexibleCollectionsEnabled$ = this.organizationService
-    .get$(this.params.organizationId)
+    .organizations$()
+    .pipe(mapToSingleOrganization(this.params.organizationId as OrganizationId))
     .pipe(map((o) => o?.flexibleCollections));
 
   protected readonly PermissionMode = PermissionMode;
@@ -70,7 +75,9 @@ export class BulkCollectionsDialogComponent implements OnDestroy {
     private collectionAdminService: CollectionAdminService,
   ) {
     this.numCollections = this.params.collections.length;
-    const organization$ = this.organizationService.get$(this.params.organizationId);
+    const organization$ = this.organizationService
+      .organizations$()
+      .pipe(mapToSingleOrganization(this.params.organizationId as OrganizationId));
     const groups$ = organization$.pipe(
       switchMap((organization) => {
         if (!organization.useGroups) {

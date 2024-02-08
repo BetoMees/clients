@@ -45,7 +45,7 @@ export class ProductSwitcherContentComponent {
   menu: MenuComponent;
 
   protected products$ = combineLatest([
-    this.organizationService.organizations$,
+    this.organizationService.organizations$(),
     this.route.paramMap,
   ]).pipe(
     concatMap(async ([orgs, paramMap]) => {

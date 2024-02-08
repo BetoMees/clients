@@ -1,5 +1,6 @@
 import { DialogConfig, DialogRef, DIALOG_DATA } from "@angular/cdk/dialog";
-import { Component, Inject, OnInit } from "@angular/core";
+import { Component, Inject, OnDestroy, OnInit } from "@angular/core";
+import { Subject, takeUntil } from "rxjs";
 
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
@@ -41,7 +42,7 @@ export const openBulkShareDialog = (
 @Component({
   templateUrl: "bulk-share-dialog.component.html",
 })
-export class BulkShareDialogComponent implements OnInit {
+export class BulkShareDialogComponent implements OnInit, OnDestroy {
   ciphers: CipherView[] = [];
   organizationId: string;
 
@@ -51,6 +52,7 @@ export class BulkShareDialogComponent implements OnInit {
   shareableCiphers: CipherView[] = [];
 
   private writeableCollections: CollectionView[] = [];
+  private destroy$ = new Subject<void>();
 
   constructor(
     @Inject(DIALOG_DATA) params: BulkShareDialogParams,
@@ -73,7 +75,12 @@ export class BulkShareDialogComponent implements OnInit {
     this.nonShareableCount = this.ciphers.length - this.shareableCiphers.length;
     const allCollections = await this.collectionService.getAllDecrypted();
     this.writeableCollections = allCollections.filter((c) => !c.readOnly);
-    this.organizations = await this.organizationService.getAll();
+    this.organizationService
+      .organizations$()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((orgs) => {
+        this.organizations = orgs;
+      });
     if (this.organizationId == null && this.organizations.length > 0) {
       this.organizationId = this.organizations[0].id;
     }
@@ -81,6 +88,8 @@ export class BulkShareDialogComponent implements OnInit {
   }
 
   ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
     this.selectAll(false);
   }
 

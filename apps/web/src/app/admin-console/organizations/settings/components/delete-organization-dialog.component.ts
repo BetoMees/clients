@@ -4,13 +4,17 @@ import { FormBuilder, FormControl, Validators } from "@angular/forms";
 import { combineLatest, Subject, takeUntil } from "rxjs";
 
 import { OrganizationApiServiceAbstraction } from "@bitwarden/common/admin-console/abstractions/organization/organization-api.service.abstraction";
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToSingleOrganization,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { UserVerificationService } from "@bitwarden/common/auth/abstractions/user-verification/user-verification.service.abstraction";
 import { Verification } from "@bitwarden/common/auth/types/verification";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { CipherType } from "@bitwarden/common/vault/enums";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
@@ -105,7 +109,9 @@ export class DeleteOrganizationDialogComponent implements OnInit, OnDestroy {
     this.deleteOrganizationRequestType = this.params.requestType;
 
     combineLatest([
-      this.organizationService.get$(this.params.organizationId),
+      this.organizationService
+        .organizations$()
+        .pipe(mapToSingleOrganization(this.params.organizationId as OrganizationId)),
       this.cipherService.getAllFromApiForOrganization(this.params.organizationId),
     ])
       .pipe(takeUntil(this.destroy$))

@@ -60,9 +60,9 @@ export class SponsoredFamiliesComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
-    this.availableSponsorshipOrgs$ = this.organizationService.organizations$.pipe(
-      map((orgs) => orgs.filter((o) => o.familySponsorshipAvailable)),
-    );
+    this.availableSponsorshipOrgs$ = this.organizationService
+      .organizations$()
+      .pipe(map((orgs) => orgs.filter((o) => o.familySponsorshipAvailable)));
 
     this.availableSponsorshipOrgs$.pipe(takeUntil(this._destroy)).subscribe((orgs) => {
       if (orgs.length === 1) {
@@ -74,9 +74,9 @@ export class SponsoredFamiliesComponent implements OnInit, OnDestroy {
 
     this.anyOrgsAvailable$ = this.availableSponsorshipOrgs$.pipe(map((orgs) => orgs.length > 0));
 
-    this.activeSponsorshipOrgs$ = this.organizationService.organizations$.pipe(
-      map((orgs) => orgs.filter((o) => o.familySponsorshipFriendlyName !== null)),
-    );
+    this.activeSponsorshipOrgs$ = this.organizationService
+      .organizations$()
+      .pipe(map((orgs) => orgs.filter((o) => o.familySponsorshipFriendlyName !== null)));
 
     this.anyActiveSponsorships$ = this.activeSponsorshipOrgs$.pipe(map((orgs) => orgs.length > 0));
 

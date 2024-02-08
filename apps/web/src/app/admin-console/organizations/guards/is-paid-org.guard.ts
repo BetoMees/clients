@@ -1,7 +1,11 @@
 import { Injectable } from "@angular/core";
 import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot } from "@angular/router";
+import { firstValueFrom } from "rxjs";
 
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToSingleOrganization,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
 import { DialogService } from "@bitwarden/components";
 
@@ -17,7 +21,11 @@ export class IsPaidOrgGuard implements CanActivate {
   ) {}
 
   async canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
-    const org = this.organizationService.get(route.params.organizationId);
+    const org = await firstValueFrom(
+      this.organizationService
+        .organizations$()
+        .pipe(mapToSingleOrganization(route.params.organizationId)),
+    );
 
     if (org == null) {
       return this.router.createUrlTree(["/"]);

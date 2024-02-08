@@ -1,3 +1,5 @@
+import { firstValueFrom } from "rxjs";
+
 import { EventCollectionService as EventCollectionServiceAbstraction } from "../../abstractions/event/event-collection.service";
 import { EventUploadService } from "../../abstractions/event/event-upload.service";
 import { OrganizationService } from "../../admin-console/abstractions/organization/organization.service.abstraction";
@@ -24,7 +26,7 @@ export class EventCollectionService implements EventCollectionServiceAbstraction
     if (!authed) {
       return;
     }
-    const organizations = await this.organizationService.getAll();
+    const organizations = await firstValueFrom(this.organizationService.organizations$());
     if (organizations == null) {
       return;
     }

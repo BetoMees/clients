@@ -1,3 +1,5 @@
+import { firstValueFrom } from "rxjs";
+
 import { ApiService } from "../../abstractions/api.service";
 import { OrganizationService } from "../../admin-console/abstractions/organization/organization.service.abstraction";
 import { OrganizationUserType } from "../../admin-console/enums";
@@ -74,7 +76,7 @@ export class KeyConnectorService implements KeyConnectorServiceAbstraction {
   }
 
   async getManagingOrganization() {
-    const orgs = await this.organizationService.getAll();
+    const orgs = await firstValueFrom(this.organizationService.organizations$());
     return orgs.find(
       (o) =>
         o.keyConnectorEnabled &&

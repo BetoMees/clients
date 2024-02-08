@@ -1,7 +1,12 @@
 import { OptionValues } from "commander";
 import * as inquirer from "inquirer";
+import { firstValueFrom } from "rxjs";
 
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToSingleOrganization,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.service.abstraction";
 import { ImportServiceAbstraction, ImportType } from "@bitwarden/importer/core";
 
@@ -19,7 +24,11 @@ export class ImportCommand {
   async run(format: ImportType, filepath: string, options: OptionValues): Promise<Response> {
     const organizationId = options.organizationid;
     if (organizationId != null) {
-      const organization = await this.organizationService.getFromState(organizationId);
+      const organization = await firstValueFrom(
+        this.organizationService
+          .organizations$()
+          .pipe(mapToSingleOrganization(organizationId as OrganizationId)),
+      );
 
       if (organization == null) {
         return Response.badRequest(

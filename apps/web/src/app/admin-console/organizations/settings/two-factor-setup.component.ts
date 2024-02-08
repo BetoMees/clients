@@ -1,15 +1,19 @@
 import { Component } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { concatMap, takeUntil } from "rxjs";
+import { concatMap, firstValueFrom, takeUntil } from "rxjs";
 import { tap } from "rxjs/operators";
 
 import { ModalService } from "@bitwarden/angular/services/modal.service";
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToSingleOrganization,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
 import { TwoFactorProviderType } from "@bitwarden/common/auth/enums/two-factor-provider-type";
 import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 
 import { TwoFactorDuoComponent } from "../../../auth/settings/two-factor-duo.component";
 import { TwoFactorSetupComponent as BaseTwoFactorSetupComponent } from "../../../auth/settings/two-factor-setup.component";
@@ -36,9 +40,13 @@ export class TwoFactorSetupComponent extends BaseTwoFactorSetupComponent {
   async ngOnInit() {
     this.route.params
       .pipe(
-        tap((params) => {
+        tap(async (params) => {
           this.organizationId = params.organizationId;
-          this.organization = this.organizationService.get(this.organizationId);
+          this.organization = await firstValueFrom(
+            this.organizationService
+              .organizations$()
+              .pipe(mapToSingleOrganization(this.organizationId as OrganizationId)),
+          );
         }),
         concatMap(async () => await super.ngOnInit()),
         takeUntil(this.destroy$),

@@ -12,11 +12,16 @@ import {
   take,
   share,
   firstValueFrom,
+  concatMap,
 } from "rxjs";
 
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToSingleOrganization,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 import { DialogService } from "@bitwarden/components";
 
 import { ProjectListView } from "../models/view/project-list.view";
@@ -105,7 +110,11 @@ export class OverviewComponent implements OnInit, OnDestroy {
 
     orgId$
       .pipe(
-        map((orgId) => this.organizationService.get(orgId)),
+        concatMap((orgId) =>
+          this.organizationService
+            .organizations$()
+            .pipe(mapToSingleOrganization(orgId as OrganizationId)),
+        ),
         takeUntil(this.destroy$),
       )
       .subscribe((org) => {

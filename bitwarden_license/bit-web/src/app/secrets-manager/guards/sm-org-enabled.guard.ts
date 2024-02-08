@@ -1,7 +1,12 @@
 import { inject } from "@angular/core";
 import { ActivatedRouteSnapshot, CanActivateFn, createUrlTreeFromSnapshot } from "@angular/router";
+import { firstValueFrom } from "rxjs";
 
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToSingleOrganization,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.service.abstraction";
 
 /**
@@ -16,7 +21,11 @@ export const organizationEnabledGuard: CanActivateFn = async (route: ActivatedRo
     await syncService.fullSync(false);
   }
 
-  const org = orgService.get(route.params.organizationId);
+  const org = await firstValueFrom(
+    orgService
+      .organizations$()
+      .pipe(mapToSingleOrganization(route.params.organizationId as OrganizationId)),
+  );
   if (org == null || !org.canAccessSecretsManager) {
     return createUrlTreeFromSnapshot(route, ["/"]);
   }

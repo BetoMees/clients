@@ -4,12 +4,16 @@ import { FormBuilder, Validators } from "@angular/forms";
 import { catchError, combineLatest, from, map, of, Subject, switchMap, takeUntil } from "rxjs";
 
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToSingleOrganization,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { OrganizationUserService } from "@bitwarden/common/admin-console/abstractions/organization-user/organization-user.service";
 import { ErrorResponse } from "@bitwarden/common/models/response/error.response";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 import { CollectionService } from "@bitwarden/common/vault/abstractions/collection.service";
 import { CollectionData } from "@bitwarden/common/vault/models/data/collection.data";
 import { Collection } from "@bitwarden/common/vault/models/domain/collection";
@@ -79,9 +83,10 @@ export const openGroupAddEditDialog = (
   templateUrl: "group-add-edit.component.html",
 })
 export class GroupAddEditComponent implements OnInit, OnDestroy {
-  protected flexibleCollectionsEnabled$ = this.organizationService
-    .get$(this.organizationId)
-    .pipe(map((o) => o?.flexibleCollections));
+  protected flexibleCollectionsEnabled$ = this.organizationService.organizations$().pipe(
+    mapToSingleOrganization(this.organizationId as OrganizationId),
+    map((o) => o?.flexibleCollections),
+  );
 
   protected PermissionMode = PermissionMode;
   protected ResultType = GroupAddEditDialogResultType;

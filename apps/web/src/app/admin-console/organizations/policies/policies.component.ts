@@ -1,13 +1,18 @@
 import { Component, OnInit, ViewChild, ViewContainerRef } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
+import { firstValueFrom } from "rxjs";
 import { first } from "rxjs/operators";
 
 import { ModalService } from "@bitwarden/angular/services/modal.service";
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToSingleOrganization,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { PolicyApiServiceAbstraction } from "@bitwarden/common/admin-console/abstractions/policy/policy-api.service.abstraction";
 import { PolicyType } from "@bitwarden/common/admin-console/enums";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { PolicyResponse } from "@bitwarden/common/admin-console/models/response/policy.response";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 
 import { PolicyListService } from "../../core/policy-list.service";
 import { BasePolicy } from "../policies";
@@ -44,7 +49,11 @@ export class PoliciesComponent implements OnInit {
     // eslint-disable-next-line rxjs-angular/prefer-takeuntil, rxjs/no-async-subscribe
     this.route.parent.parent.params.subscribe(async (params) => {
       this.organizationId = params.organizationId;
-      this.organization = await this.organizationService.get(this.organizationId);
+      this.organization = await firstValueFrom(
+        this.organizationService
+          .organizations$()
+          .pipe(mapToSingleOrganization(this.organizationId as OrganizationId)),
+      );
       this.policies = this.policyListService.getPolicies();
 
       await this.load();

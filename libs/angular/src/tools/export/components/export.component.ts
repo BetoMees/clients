@@ -3,7 +3,10 @@ import { UntypedFormBuilder, Validators } from "@angular/forms";
 import { map, merge, Observable, startWith, Subject, takeUntil } from "rxjs";
 
 import { EventCollectionService } from "@bitwarden/common/abstractions/event/event-collection.service";
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToExcludeSpecialOrganizations,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
 import { PolicyType } from "@bitwarden/common/admin-console/enums";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
@@ -93,7 +96,8 @@ export class ExportComponent implements OnInit, OnDestroy {
       .subscribe(() => this.adjustValidators());
 
     if (this.organizationId) {
-      this.organizations$ = this.organizationService.memberOrganizations$.pipe(
+      this.organizations$ = this.organizationService.organizations$().pipe(
+        mapToExcludeSpecialOrganizations(),
         map((orgs) => orgs.filter((org) => org.id == this.organizationId)),
       );
       this.exportForm.controls.vaultSelector.patchValue(this.organizationId);
@@ -101,7 +105,8 @@ export class ExportComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.organizations$ = this.organizationService.memberOrganizations$.pipe(
+    this.organizations$ = this.organizationService.organizations$().pipe(
+      mapToExcludeSpecialOrganizations(),
       map((orgs) =>
         orgs
           .filter((org) => org.flexibleCollections)

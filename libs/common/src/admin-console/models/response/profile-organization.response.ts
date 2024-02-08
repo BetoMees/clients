@@ -1,10 +1,11 @@
 import { ProductType } from "../../../enums";
 import { BaseResponse } from "../../../models/response/base.response";
+import { OrganizationId } from "../../../types/guid";
 import { OrganizationUserStatusType, OrganizationUserType, ProviderType } from "../../enums";
 import { PermissionsApi } from "../api/permissions.api";
 
 export class ProfileOrganizationResponse extends BaseResponse {
-  id: string;
+  id: OrganizationId;
   name: string;
   usePolicies: boolean;
   useGroups: boolean;

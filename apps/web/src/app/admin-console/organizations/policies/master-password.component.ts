@@ -1,12 +1,17 @@
 import { Component } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { firstValueFrom } from "rxjs";
 
 import { ControlsOf } from "@bitwarden/angular/types/controls-of";
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToSingleOrganization,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { PolicyType } from "@bitwarden/common/admin-console/enums";
 import { MasterPasswordPolicyOptions } from "@bitwarden/common/admin-console/models/domain/master-password-policy-options";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 
 import { BasePolicy, BasePolicyComponent } from "./base-policy.component";
 
@@ -56,7 +61,11 @@ export class MasterPasswordPolicyComponent extends BasePolicyComponent {
 
   async ngOnInit() {
     super.ngOnInit();
-    const organization = await this.organizationService.get(this.policyResponse.organizationId);
+    const organization = await firstValueFrom(
+      this.organizationService
+        .organizations$()
+        .pipe(mapToSingleOrganization(this.policyResponse.organizationId as OrganizationId)),
+    );
     this.showKeyConnectorInfo = organization.keyConnectorEnabled;
   }
 }

@@ -9,11 +9,14 @@ import {
 } from "@angular/core";
 import { FormBuilder, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
-import { Subject, takeUntil } from "rxjs";
+import { firstValueFrom, Subject, takeUntil } from "rxjs";
 
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { OrganizationApiServiceAbstraction } from "@bitwarden/common/admin-console/abstractions/organization/organization-api.service.abstraction";
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToSingleOrganization,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
 import { PolicyType } from "@bitwarden/common/admin-console/enums";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
@@ -35,6 +38,7 @@ import { MessagingService } from "@bitwarden/common/platform/abstractions/messag
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { EncString } from "@bitwarden/common/platform/models/domain/enc-string";
 import { SymmetricCryptoKey } from "@bitwarden/common/platform/models/domain/symmetric-crypto-key";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 import { OrgKey } from "@bitwarden/common/types/key";
 import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.service.abstraction";
 
@@ -150,7 +154,11 @@ export class OrganizationPlansComponent implements OnInit, OnDestroy {
 
   async ngOnInit() {
     if (this.organizationId) {
-      this.organization = this.organizationService.get(this.organizationId);
+      this.organization = await firstValueFrom(
+        this.organizationService
+          .organizations$()
+          .pipe(mapToSingleOrganization(this.organizationId as OrganizationId)),
+      );
       this.billing = await this.organizationApiService.getBilling(this.organizationId);
       this.sub = await this.organizationApiService.getSubscription(this.organizationId);
     }

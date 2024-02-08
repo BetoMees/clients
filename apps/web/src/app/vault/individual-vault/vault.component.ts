@@ -33,7 +33,10 @@ import { ModalService } from "@bitwarden/angular/services/modal.service";
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { EventCollectionService } from "@bitwarden/common/abstractions/event/event-collection.service";
 import { SearchService } from "@bitwarden/common/abstractions/search.service";
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToSingleOrganization,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { TokenService } from "@bitwarden/common/auth/abstractions/token.service";
 import { UserVerificationService } from "@bitwarden/common/auth/abstractions/user-verification/user-verification.service.abstraction";
@@ -49,6 +52,7 @@ import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/pl
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
 import { KdfType, PBKDF2_ITERATIONS } from "@bitwarden/common/platform/enums";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { CollectionService } from "@bitwarden/common/vault/abstractions/collection.service";
 import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.service.abstraction";
@@ -372,7 +376,7 @@ export class VaultComponent implements OnInit, OnDestroy {
             filter$,
             canAccessPremium$,
             allCollections$,
-            this.organizationService.organizations$,
+            this.organizationService.organizations$(),
             ciphers$,
             collections$,
             selectedCollection$,
@@ -520,7 +524,11 @@ export class VaultComponent implements OnInit, OnDestroy {
       this.messagingService.send("premiumRequired");
       return;
     } else if (cipher.organizationId != null) {
-      const org = this.organizationService.get(cipher.organizationId);
+      const org = await firstValueFrom(
+        this.organizationService
+          .organizations$()
+          .pipe(mapToSingleOrganization(cipher.organizationId as OrganizationId)),
+      );
       if (org != null && (org.maxStorageGb == null || org.maxStorageGb === 0)) {
         this.messagingService.send("upgradeOrganization", {
           organizationId: cipher.organizationId,
@@ -699,7 +707,11 @@ export class VaultComponent implements OnInit, OnDestroy {
   }
 
   async deleteCollection(collection: CollectionView): Promise<void> {
-    const organization = this.organizationService.get(collection.organizationId);
+    const organization = await firstValueFrom(
+      this.organizationService
+        .organizations$()
+        .pipe(mapToSingleOrganization(collection.organizationId as OrganizationId)),
+    );
     if (!collection.canDelete(organization)) {
       this.platformUtilsService.showToast(
         "error",
@@ -807,9 +819,9 @@ export class VaultComponent implements OnInit, OnDestroy {
         .filter((i) => i.cipher === undefined)
         .map((i) => i.collection.organizationId);
       const orgs = await firstValueFrom(
-        this.organizationService.organizations$.pipe(
-          map((orgs) => orgs.filter((o) => orgIds.includes(o.id))),
-        ),
+        this.organizationService
+          .organizations$()
+          .pipe(map((orgs) => orgs.filter((o) => orgIds.includes(o.id)))),
       );
       await this.bulkDelete(ciphers, collections, orgs);
     }

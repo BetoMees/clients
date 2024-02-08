@@ -1,4 +1,5 @@
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 import { CipherType } from "@bitwarden/common/vault/enums";
 import { TreeNode } from "@bitwarden/common/vault/models/domain/tree-node";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
@@ -201,7 +202,7 @@ describe("VaultFilter", () => {
       it("should return false when filter does not match organization id", () => {
         const filterFunction = createFilterFunction({
           selectedOrganizationNode: createOrganizationFilterNode({
-            id: "nonMatchingOrganizationId",
+            id: "nonMatchingOrganizationId" as OrganizationId,
           }),
         });
 
@@ -212,7 +213,9 @@ describe("VaultFilter", () => {
 
       it("should return false when filtering for my vault only", () => {
         const filterFunction = createFilterFunction({
-          selectedOrganizationNode: createOrganizationFilterNode({ id: "MyVault" }),
+          selectedOrganizationNode: createOrganizationFilterNode({
+            id: "MyVault" as OrganizationId,
+          }),
         });
 
         const result = filterFunction(cipher);
@@ -246,7 +249,9 @@ describe("VaultFilter", () => {
 
       it("should return true when filter matches organization id", () => {
         const filterFunction = createFilterFunction({
-          selectedOrganizationNode: createOrganizationFilterNode({ id: "organizationId" }),
+          selectedOrganizationNode: createOrganizationFilterNode({
+            id: "organizationId" as OrganizationId,
+          }),
         });
 
         const result = filterFunction(cipher);
@@ -271,7 +276,9 @@ describe("VaultFilter", () => {
       it("should return true when filtering for my vault only", () => {
         const cipher = createCipher({ organizationId: null });
         const filterFunction = createFilterFunction({
-          selectedOrganizationNode: createOrganizationFilterNode({ id: "MyVault" }),
+          selectedOrganizationNode: createOrganizationFilterNode({
+            id: "MyVault" as OrganizationId,
+          }),
         });
 
         const result = filterFunction(cipher);

@@ -92,9 +92,9 @@ export class FamiliesForEnterpriseSetupComponent implements OnInit, OnDestroy {
       this.loading = false;
     });
 
-    this.existingFamilyOrganizations$ = this.organizationService.organizations$.pipe(
-      map((orgs) => orgs.filter((o) => o.planProductType === ProductType.Families)),
-    );
+    this.existingFamilyOrganizations$ = this.organizationService
+      .organizations$()
+      .pipe(map((orgs) => orgs.filter((o) => o.planProductType === ProductType.Families)));
 
     this.existingFamilyOrganizations$.pipe(takeUntil(this._destroy)).subscribe((orgs) => {
       if (orgs.length === 0) {

@@ -1,8 +1,12 @@
 import { Component } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { map } from "rxjs";
+import { concatMap, map } from "rxjs";
 
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToSingleOrganization,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 import { Icon, Icons } from "@bitwarden/components";
 
 @Component({
@@ -16,6 +20,11 @@ export class OrgSuspendedComponent {
 
   protected NoAccess: Icon = Icons.NoAccess;
   protected organizationName$ = this.route.params.pipe(
-    map((params) => this.organizationService.get(params.organizationId)?.name),
+    concatMap((params) =>
+      this.organizationService
+        .organizations$()
+        .pipe(mapToSingleOrganization(params.organizationId as OrganizationId)),
+    ),
+    map((org) => org?.name),
   );
 }

@@ -1,4 +1,5 @@
 import { Component, OnInit, ViewChild, ViewContainerRef } from "@angular/core";
+import { firstValueFrom } from "rxjs";
 
 import { UserNamePipe } from "@bitwarden/angular/pipes/user-name.pipe";
 import { ModalService } from "@bitwarden/angular/services/modal.service";
@@ -58,7 +59,7 @@ export class EmergencyAccessComponent implements OnInit {
 
   async ngOnInit() {
     this.canAccessPremium = await this.stateService.getCanAccessPremium();
-    const orgs = await this.organizationService.getAll();
+    const orgs = await firstValueFrom(this.organizationService.organizations$());
     this.isOrganizationOwner = orgs.some((o) => o.isOwner);
     // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
     // eslint-disable-next-line @typescript-eslint/no-floating-promises

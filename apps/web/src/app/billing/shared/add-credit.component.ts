@@ -10,7 +10,10 @@ import {
 import { firstValueFrom } from "rxjs";
 
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import {
+  mapToSingleOrganization,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { PaymentMethodType } from "@bitwarden/common/billing/enums";
 import { BitPayInvoiceRequest } from "@bitwarden/common/billing/models/request/bit-pay-invoice.request";
 import { ConfigServiceAbstraction } from "@bitwarden/common/platform/abstractions/config/config.service.abstraction";
@@ -18,6 +21,7 @@ import { PayPalConfig } from "@bitwarden/common/platform/abstractions/environmen
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 
 @Component({
   selector: "app-add-credit",
@@ -66,7 +70,11 @@ export class AddCreditComponent implements OnInit {
         this.creditAmount = "20.00";
       }
       this.ppButtonCustomField = "organization_id:" + this.organizationId;
-      const org = await this.organizationService.get(this.organizationId);
+      const org = await firstValueFrom(
+        this.organizationService
+          .organizations$()
+          .pipe(mapToSingleOrganization(this.organizationId as OrganizationId)),
+      );
       if (org != null) {
         this.subject = org.name;
         this.name = org.name;

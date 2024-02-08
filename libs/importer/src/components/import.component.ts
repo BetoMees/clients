@@ -19,6 +19,8 @@ import { JslibModule } from "@bitwarden/angular/jslib.module";
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import {
   canAccessImport,
+  mapToExcludeSpecialOrganizations,
+  mapToSingleOrganization,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
@@ -30,6 +32,7 @@ import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.servic
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { CollectionService } from "@bitwarden/common/vault/abstractions/collection.service";
 import { FolderService } from "@bitwarden/common/vault/abstractions/folder/folder.service.abstraction";
@@ -120,8 +123,11 @@ export class ImportComponent implements OnInit, OnDestroy {
   @Input() set organizationId(value: string) {
     this._organizationId = value;
     this.organizationService
-      .get$(this._organizationId)
-      .pipe(takeUntil(this.destroy$))
+      .organizations$()
+      .pipe(
+        mapToSingleOrganization(this._organizationId as OrganizationId),
+        takeUntil(this.destroy$),
+      )
       .subscribe((organization) => {
         this._organizationId = organization?.id;
         this.organization = organization;
@@ -207,7 +213,7 @@ export class ImportComponent implements OnInit, OnDestroy {
     this.setImportOptions();
 
     await this.initializeOrganizations();
-    if (this.organizationId && this.canAccessImportExport(this.organizationId)) {
+    if (this.organizationId && (await this.canAccessImportExport(this.organizationId))) {
       this.handleOrganizationImportInit();
     } else {
       this.handleImportInit();
@@ -272,7 +278,8 @@ export class ImportComponent implements OnInit, OnDestroy {
 
   private async initializeOrganizations() {
     this.organizations$ = concat(
-      this.organizationService.memberOrganizations$.pipe(
+      this.organizationService.organizations$().pipe(
+        mapToExcludeSpecialOrganizations(),
         canAccessImport(this.i18nService),
         map((orgs) => orgs.sort(Utils.getSortFunction(this.i18nService, "name"))),
       ),
@@ -359,7 +366,7 @@ export class ImportComponent implements OnInit, OnDestroy {
         importContents,
         this.organizationId,
         this.formGroup.controls.targetSelector.value,
-        this.canAccessImportExport(this.organizationId) && this._isFromAC,
+        (await this.canAccessImportExport(this.organizationId)) && this._isFromAC,
       );
 
       //No errors, display success message
@@ -379,11 +386,17 @@ export class ImportComponent implements OnInit, OnDestroy {
     }
   }
 
-  private canAccessImportExport(organizationId?: string): boolean {
+  private async canAccessImportExport(organizationId?: string): Promise<boolean> {
     if (!organizationId) {
       return false;
     }
-    return this.organizationService.get(this.organizationId)?.canAccessImportExport;
+    return (
+      await firstValueFrom(
+        this.organizationService
+          .organizations$()
+          .pipe(mapToSingleOrganization(this.organizationId as OrganizationId)),
+      )
+    )?.canAccessImportExport;
   }
 
   getFormatInstructionTitle() {
