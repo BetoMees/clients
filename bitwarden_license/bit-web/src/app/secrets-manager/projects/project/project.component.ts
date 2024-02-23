@@ -10,12 +10,17 @@ import {
   Subject,
   switchMap,
   takeUntil,
+  concatMap,
+  map,
 } from "rxjs";
 
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
-import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
+import {
+  mapToSingleOrganization,
+  OrganizationService,
+} from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
+import { OrganizationId } from "@bitwarden/common/types/guid";
 import { DialogService } from "@bitwarden/components";
 
 import { ProjectView } from "../../models/view/project.view";
@@ -35,7 +40,6 @@ export class ProjectComponent implements OnInit, OnDestroy {
 
   private organizationId: string;
   private projectId: string;
-  private organizations: Organization[];
   private organizationEnabled: boolean;
   private destroy$ = new Subject<void>();
 
@@ -72,18 +76,22 @@ export class ProjectComponent implements OnInit, OnDestroy {
       }),
     );
 
-    this.organizationService
-      .organizations$()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((orgs) => {
-        this.organizations = orgs;
-      });
+    const projectId$ = this.route.params.pipe(map((p) => p.projectId));
+    const organization$ = this.route.params.pipe(
+      concatMap((params) =>
+        this.organizationService
+          .organizations$()
+          .pipe(mapToSingleOrganization(params.organizationId as OrganizationId)),
+      ),
+    );
 
-    this.route.params.pipe(takeUntil(this.destroy$)).subscribe((params) => {
-      this.organizationId = params.organizationId;
-      this.projectId = params.projectId;
-      this.organizationEnabled = this.organizations[params.organizationId]?.enabled;
-    });
+    combineLatest([projectId$, organization$])
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(([projectId, organization]) => {
+        this.organizationId = organization.id;
+        this.projectId = projectId;
+        this.organizationEnabled = organization.enabled;
+      });
   }
 
   ngOnDestroy(): void {
