@@ -127,7 +127,7 @@ export class OrganizationMigrator extends Migrator<25, 26> {
       }
     }
 
-    await Promise.all([...accounts.map(({ userId, account }) => migrateAccount(userId, account))]);
+    await Promise.all(accounts.map(({ userId, account }) => migrateAccount(userId, account)));
   }
 
   async rollback(helper: MigrationHelper): Promise<void> {
@@ -143,6 +143,6 @@ export class OrganizationMigrator extends Migrator<25, 26> {
       await helper.setToUser(userId, USER_ORGANIZATIONS, null);
     }
 
-    await Promise.all([...accounts.map(({ userId, account }) => rollbackAccount(userId, account))]);
+    await Promise.all(accounts.map(({ userId, account }) => rollbackAccount(userId, account)));
   }
 }
