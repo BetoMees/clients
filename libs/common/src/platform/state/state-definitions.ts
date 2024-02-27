@@ -54,6 +54,8 @@ export const COLLECTION_DATA = new StateDefinition("collection", "disk", {
 
 export const BADGE_SETTINGS_DISK = new StateDefinition("badgeSettings", "disk");
 
+export const DOMAIN_SETTINGS_DISK = new StateDefinition("domainSettings", "disk");
+
 export const AUTOFILL_SETTINGS_DISK = new StateDefinition("autofillSettings", "disk");
 export const AUTOFILL_SETTINGS_DISK_LOCAL = new StateDefinition("autofillSettingsLocal", "disk", {
   web: "disk-local",
