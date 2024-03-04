@@ -4,7 +4,9 @@ import { EventCollectionService } from "@bitwarden/common/abstractions/event/eve
 import { SettingsService } from "@bitwarden/common/abstractions/settings.service";
 import { UserVerificationService } from "@bitwarden/common/auth/abstractions/user-verification/user-verification.service.abstraction";
 import { AutofillSettingsServiceAbstraction } from "@bitwarden/common/autofill/services/autofill-settings.service";
+import { DomainSettingsServiceAbstraction } from "@bitwarden/common/autofill/services/domain-settings.service";
 import { EventType } from "@bitwarden/common/enums";
+import { UriMatchStrategySetting } from "@bitwarden/common/models/domain/domain-service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { TotpService } from "@bitwarden/common/vault/abstractions/totp.service";
@@ -45,6 +47,7 @@ export default class AutofillService implements AutofillServiceInterface {
     private cipherService: CipherService,
     private stateService: BrowserStateService,
     private autofillSettingsService: AutofillSettingsServiceAbstraction,
+    private domainSettingsService: DomainSettingsServiceAbstraction,
     private totpService: TotpService,
     private eventCollectionService: EventCollectionService,
     private logService: LogService,
@@ -216,6 +219,13 @@ export default class AutofillService implements AutofillServiceInterface {
   }
 
   /**
+   * Gets the default URI match strategy setting from the domain settings service.
+   */
+  async getDefaultUriMatchStrategy(): Promise<UriMatchStrategySetting> {
+    return await firstValueFrom(this.domainSettingsService.defaultUriMatchStrategy$);
+  }
+
+  /**
    * Autofill a given tab with a given login item
    * @param {AutoFillOptions} options Instructions about the autofill operation, including tab and login item
    * @returns {Promise<string | null>} The TOTP code of the successfully autofilled login, if any
@@ -229,7 +239,7 @@ export default class AutofillService implements AutofillServiceInterface {
     let totp: string | null = null;
 
     const canAccessPremium = await this.stateService.getCanAccessPremium();
-    const defaultUriMatch = (await this.stateService.getDefaultUriMatch()) ?? UriMatchType.Domain;
+    const defaultUriMatch = await this.getDefaultUriMatchStrategy();
 
     if (!canAccessPremium) {
       options.cipher.login.totp = null;
@@ -1076,6 +1086,7 @@ export default class AutofillService implements AutofillServiceInterface {
     // Check the pageUrl against cipher URIs using the configured match detection.
     // Remember: if we are in this function, the tabUrl already matches a saved URI for the login.
     // We need to verify the pageUrl also matches.
+    // @TODO
     const equivalentDomains = this.settingsService.getEquivalentDomains(pageUrl);
     const matchesUri = options.cipher.login.matchesUri(
       pageUrl,

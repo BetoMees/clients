@@ -3,6 +3,7 @@ import { firstValueFrom } from "rxjs";
 
 import { SettingsService } from "@bitwarden/common/abstractions/settings.service";
 import { AutofillSettingsServiceAbstraction } from "@bitwarden/common/autofill/services/autofill-settings.service";
+import { DomainSettingsServiceAbstraction } from "@bitwarden/common/autofill/services/domain-settings.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
@@ -43,6 +44,7 @@ export class AutofillComponent implements OnInit {
     private autofillService: AutofillService,
     private dialogService: DialogService,
     private autofillSettingsService: AutofillSettingsServiceAbstraction,
+    private domainSettingsService: DomainSettingsServiceAbstraction,
   ) {
     this.autoFillOverlayVisibilityOptions = [
       {
@@ -96,7 +98,9 @@ export class AutofillComponent implements OnInit {
       this.autofillSettingsService.autofillOnPageLoadDefault$,
     );
 
-    const defaultUriMatch = await this.stateService.getDefaultUriMatch();
+    const defaultUriMatch = await firstValueFrom(
+      this.domainSettingsService.defaultUriMatchStrategy$,
+    );
     this.defaultUriMatch = defaultUriMatch == null ? UriMatchType.Domain : defaultUriMatch;
 
     const command = await this.platformUtilsService.getAutofillKeyboardShortcut();
@@ -121,7 +125,7 @@ export class AutofillComponent implements OnInit {
   }
 
   async saveDefaultUriMatch() {
-    await this.stateService.setDefaultUriMatch(this.defaultUriMatch);
+    await this.domainSettingsService.setDefaultUriMatchStrategy(this.defaultUriMatch);
   }
 
   private async setAutofillKeyboardHelperText(command: string) {

@@ -56,6 +56,10 @@ import {
   BadgeSettingsService,
 } from "@bitwarden/common/autofill/services/badge-settings.service";
 import {
+  DomainSettingsServiceAbstraction,
+  DomainSettingsService,
+} from "@bitwarden/common/autofill/services/domain-settings.service";
+import {
   UserNotificationSettingsService,
   UserNotificationSettingsServiceAbstraction,
 } from "@bitwarden/common/autofill/services/user-notification-settings.service";
@@ -258,6 +262,7 @@ export default class MainBackground {
   userNotificationSettingsService: UserNotificationSettingsServiceAbstraction;
   autofillSettingsService: AutofillSettingsServiceAbstraction;
   badgeSettingsService: BadgeSettingsServiceAbstraction;
+  domainSettingsService: DomainSettingsServiceAbstraction;
   systemService: SystemServiceAbstraction;
   eventCollectionService: EventCollectionServiceAbstraction;
   eventUploadService: EventUploadServiceAbstraction;
@@ -483,6 +488,7 @@ export default class MainBackground {
       this.appIdService,
       (expired: boolean) => this.logout(expired),
     );
+    this.domainSettingsService = new DomainSettingsService(this.stateProvider);
     this.settingsService = new BrowserSettingsService(this.stateService);
     this.fileUploadService = new FileUploadService(this.logService);
     this.cipherFileUploadService = new CipherFileUploadService(
@@ -617,6 +623,7 @@ export default class MainBackground {
       this.searchService,
       this.stateService,
       this.autofillSettingsService,
+      this.domainSettingsService,
       this.encryptService,
       this.cipherFileUploadService,
       this.configService,
@@ -732,6 +739,7 @@ export default class MainBackground {
       this.cipherService,
       this.stateService,
       this.autofillSettingsService,
+      this.domainSettingsService,
       this.totpService,
       this.eventCollectionService,
       this.logService,
@@ -799,6 +807,7 @@ export default class MainBackground {
       this.authService,
       this.stateService,
       this.vaultSettingsService,
+      this.domainSettingsService,
       this.logService,
     );
 
@@ -867,6 +876,7 @@ export default class MainBackground {
       this.folderService,
       this.stateService,
       this.userNotificationSettingsService,
+      this.domainSettingsService,
       this.environmentService,
       this.logService,
     );
@@ -1110,6 +1120,7 @@ export default class MainBackground {
       this.vaultFilterService.clear(),
       this.biometricStateService.logout(userId),
       this.providerService.save(null, userId),
+      this.domainSettingsService.clear(),
       /* We intentionally do not clear:
        *  - autofillSettingsService
        *  - badgeSettingsService

@@ -38,6 +38,10 @@ import {
   AutofillSettingsServiceInitOptions,
   autofillSettingsServiceFactory,
 } from "./autofill-settings-service.factory";
+import {
+  DomainSettingsServiceInitOptions,
+  domainSettingsServiceFactory,
+} from "./domain-settings-service.factory";
 
 type AutoFillServiceOptions = FactoryOptions;
 
@@ -49,7 +53,8 @@ export type AutoFillServiceInitOptions = AutoFillServiceOptions &
   EventCollectionServiceInitOptions &
   LogServiceInitOptions &
   SettingsServiceInitOptions &
-  UserVerificationServiceInitOptions;
+  UserVerificationServiceInitOptions &
+  DomainSettingsServiceInitOptions;
 
 export function autofillServiceFactory(
   cache: { autofillService?: AbstractAutoFillService } & CachedServices,
@@ -64,6 +69,7 @@ export function autofillServiceFactory(
         await cipherServiceFactory(cache, opts),
         await stateServiceFactory(cache, opts),
         await autofillSettingsServiceFactory(cache, opts),
+        await domainSettingsServiceFactory(cache, opts),
         await totpServiceFactory(cache, opts),
         await eventCollectionServiceFactory(cache, opts),
         await logServiceFactory(cache, opts),

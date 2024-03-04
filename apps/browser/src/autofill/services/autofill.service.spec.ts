@@ -2,6 +2,7 @@ import { mock, mockReset } from "jest-mock-extended";
 
 import { UserVerificationService } from "@bitwarden/common/auth/services/user-verification/user-verification.service";
 import { AutofillSettingsService } from "@bitwarden/common/autofill/services/autofill-settings.service";
+import { DomainSettingsServiceAbstraction } from "@bitwarden/common/autofill/services/domain-settings.service";
 import { EventType } from "@bitwarden/common/enums";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { EventCollectionService } from "@bitwarden/common/services/event/event-collection.service";
@@ -52,6 +53,7 @@ describe("AutofillService", () => {
   const cipherService = mock<CipherService>();
   const stateService = mock<BrowserStateService>();
   const autofillSettingsService = mock<AutofillSettingsService>();
+  const domainSettingsService = mock<DomainSettingsServiceAbstraction>();
   const totpService = mock<TotpService>();
   const eventCollectionService = mock<EventCollectionService>();
   const logService = mock<LogService>();
@@ -63,6 +65,7 @@ describe("AutofillService", () => {
       cipherService,
       stateService,
       autofillSettingsService,
+      domainSettingsService,
       totpService,
       eventCollectionService,
       logService,
@@ -407,6 +410,8 @@ describe("AutofillService", () => {
       autofillOptions.cipher.login.matchesUri = jest.fn().mockReturnValue(true);
       autofillOptions.cipher.login.username = "username";
       autofillOptions.cipher.login.password = "password";
+
+      jest.spyOn(autofillService, "getDefaultUriMatchStrategy").mockResolvedValue(0);
     });
 
     describe("given a set of autofill options that are incomplete", () => {
@@ -468,7 +473,6 @@ describe("AutofillService", () => {
 
     it("will autofill login data for a page", async () => {
       jest.spyOn(stateService, "getCanAccessPremium");
-      jest.spyOn(stateService, "getDefaultUriMatch");
       jest.spyOn(autofillService as any, "generateFillScript");
       jest.spyOn(autofillService as any, "generateLoginFillScript");
       jest.spyOn(logService, "info");
@@ -479,7 +483,7 @@ describe("AutofillService", () => {
 
       const currentAutofillPageDetails = autofillOptions.pageDetails[0];
       expect(stateService.getCanAccessPremium).toHaveBeenCalled();
-      expect(stateService.getDefaultUriMatch).toHaveBeenCalled();
+      expect(autofillService["getDefaultUriMatchStrategy"]).toHaveBeenCalled();
       expect(autofillService["generateFillScript"]).toHaveBeenCalledWith(
         currentAutofillPageDetails.details,
         {

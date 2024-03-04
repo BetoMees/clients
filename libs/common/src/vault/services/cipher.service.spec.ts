@@ -6,6 +6,7 @@ import { ApiService } from "../../abstractions/api.service";
 import { SearchService } from "../../abstractions/search.service";
 import { SettingsService } from "../../abstractions/settings.service";
 import { AutofillSettingsService } from "../../autofill/services/autofill-settings.service";
+import { DomainSettingsService } from "../../autofill/services/domain-settings.service";
 import { ConfigServiceAbstraction } from "../../platform/abstractions/config/config.service.abstraction";
 import { CryptoService } from "../../platform/abstractions/crypto.service";
 import { EncryptService } from "../../platform/abstractions/encrypt.service";
@@ -99,6 +100,7 @@ describe("Cipher Service", () => {
   const cryptoService = mock<CryptoService>();
   const stateService = mock<StateService>();
   const autofillSettingsService = mock<AutofillSettingsService>();
+  const domainSettingsService = mock<DomainSettingsService>();
   const settingsService = mock<SettingsService>();
   const apiService = mock<ApiService>();
   const cipherFileUploadService = mock<CipherFileUploadService>();
@@ -124,6 +126,7 @@ describe("Cipher Service", () => {
       searchService,
       stateService,
       autofillSettingsService,
+      domainSettingsService,
       encryptService,
       cipherFileUploadService,
       configService,

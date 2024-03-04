@@ -5,6 +5,7 @@ import { ApiService } from "../../abstractions/api.service";
 import { SearchService } from "../../abstractions/search.service";
 import { SettingsService } from "../../abstractions/settings.service";
 import { AutofillSettingsServiceAbstraction } from "../../autofill/services/autofill-settings.service";
+import { DomainSettingsServiceAbstraction } from "../../autofill/services/domain-settings.service";
 import { ErrorResponse } from "../../models/response/error.response";
 import { ListResponse } from "../../models/response/list.response";
 import { View } from "../../models/view/view";
@@ -67,6 +68,7 @@ export class CipherService implements CipherServiceAbstraction {
     private searchService: SearchService,
     private stateService: StateService,
     private autofillSettingsService: AutofillSettingsServiceAbstraction,
+    private domainSettingsService: DomainSettingsServiceAbstraction,
     private encryptService: EncryptService,
     private cipherFileUploadService: CipherFileUploadService,
     private configService: ConfigServiceAbstraction,
@@ -361,9 +363,10 @@ export class CipherService implements CipherServiceAbstraction {
       return Promise.resolve([]);
     }
 
+    // @TODO
     const equivalentDomains = this.settingsService.getEquivalentDomains(url);
     const ciphers = await this.getAllDecrypted();
-    defaultMatch ??= await this.stateService.getDefaultUriMatch();
+    defaultMatch ??= await firstValueFrom(this.domainSettingsService.defaultUriMatchStrategy$);
 
     return ciphers.filter((cipher) => {
       const cipherIsLogin = cipher.type === CipherType.Login && cipher.login !== null;
@@ -503,12 +506,12 @@ export class CipherService implements CipherServiceAbstraction {
       return;
     }
 
-    let domains = await this.stateService.getNeverDomains();
+    let domains = await firstValueFrom(this.domainSettingsService.neverDomains$);
     if (!domains) {
       domains = {};
     }
     domains[domain] = null;
-    await this.stateService.setNeverDomains(domains);
+    await this.domainSettingsService.setNeverDomains(domains);
   }
 
   async createWithServer(cipher: Cipher, orgAdmin?: boolean): Promise<any> {

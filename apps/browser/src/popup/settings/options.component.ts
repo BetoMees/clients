@@ -5,6 +5,7 @@ import { AbstractThemingService } from "@bitwarden/angular/platform/services/the
 import { SettingsService } from "@bitwarden/common/abstractions/settings.service";
 import { AutofillSettingsServiceAbstraction } from "@bitwarden/common/autofill/services/autofill-settings.service";
 import { BadgeSettingsServiceAbstraction } from "@bitwarden/common/autofill/services/badge-settings.service";
+import { DomainSettingsServiceAbstraction } from "@bitwarden/common/autofill/services/domain-settings.service";
 import { UserNotificationSettingsServiceAbstraction } from "@bitwarden/common/autofill/services/user-notification-settings.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
@@ -50,6 +51,7 @@ export class OptionsComponent implements OnInit {
     private stateService: StateService,
     private userNotificationSettingsService: UserNotificationSettingsServiceAbstraction,
     private autofillSettingsService: AutofillSettingsServiceAbstraction,
+    private domainSettingsService: DomainSettingsServiceAbstraction,
     private badgeSettingsService: BadgeSettingsServiceAbstraction,
     i18nService: I18nService,
     private themingService: AbstractThemingService,
@@ -120,7 +122,9 @@ export class OptionsComponent implements OnInit {
 
     this.theme = await this.stateService.getTheme();
 
-    const defaultUriMatch = await this.stateService.getDefaultUriMatch();
+    const defaultUriMatch = await firstValueFrom(
+      this.domainSettingsService.defaultUriMatchStrategy$,
+    );
     this.defaultUriMatch = defaultUriMatch == null ? UriMatchType.Domain : defaultUriMatch;
 
     this.clearClipboard = await firstValueFrom(this.autofillSettingsService.clearClipboardDelay$);
@@ -178,10 +182,6 @@ export class OptionsComponent implements OnInit {
 
   async saveTheme() {
     await this.themingService.updateConfiguredTheme(this.theme);
-  }
-
-  async saveDefaultUriMatch() {
-    await this.stateService.setDefaultUriMatch(this.defaultUriMatch);
   }
 
   async saveClearClipboard() {

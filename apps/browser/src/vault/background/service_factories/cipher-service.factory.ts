@@ -6,6 +6,10 @@ import {
   autofillSettingsServiceFactory,
 } from "../../../autofill/background/service_factories/autofill-settings-service.factory";
 import {
+  DomainSettingsServiceInitOptions,
+  domainSettingsServiceFactory,
+} from "../../../autofill/background/service_factories/domain-settings-service.factory";
+import {
   CipherFileUploadServiceInitOptions,
   cipherFileUploadServiceFactory,
 } from "../../../background/service-factories/cipher-file-upload-service.factory";
@@ -58,6 +62,7 @@ export type CipherServiceInitOptions = CipherServiceFactoryOptions &
   SearchServiceInitOptions &
   StateServiceInitOptions &
   AutofillSettingsServiceInitOptions &
+  DomainSettingsServiceInitOptions &
   EncryptServiceInitOptions &
   ConfigServiceInitOptions;
 
@@ -78,6 +83,7 @@ export function cipherServiceFactory(
         await searchServiceFactory(cache, opts),
         await stateServiceFactory(cache, opts),
         await autofillSettingsServiceFactory(cache, opts),
+        await domainSettingsServiceFactory(cache, opts),
         await encryptServiceFactory(cache, opts),
         await cipherFileUploadServiceFactory(cache, opts),
         await configServiceFactory(cache, opts),
