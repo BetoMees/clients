@@ -1,12 +1,10 @@
 import { Component, OnInit } from "@angular/core";
 import { firstValueFrom } from "rxjs";
 
-import { SettingsService } from "@bitwarden/common/abstractions/settings.service";
 import { AutofillSettingsServiceAbstraction } from "@bitwarden/common/autofill/services/autofill-settings.service";
 import { DomainSettingsServiceAbstraction } from "@bitwarden/common/autofill/services/domain-settings.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
-import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
 import { UriMatchType } from "@bitwarden/common/vault/enums";
 import { DialogService } from "@bitwarden/components";
 
@@ -37,14 +35,12 @@ export class AutofillComponent implements OnInit {
   accountSwitcherEnabled = false;
 
   constructor(
-    private stateService: StateService,
     private i18nService: I18nService,
     private platformUtilsService: PlatformUtilsService,
-    private settingsService: SettingsService,
+    private domainSettingsService: DomainSettingsServiceAbstraction,
     private autofillService: AutofillService,
     private dialogService: DialogService,
     private autofillSettingsService: AutofillSettingsServiceAbstraction,
-    private domainSettingsService: DomainSettingsServiceAbstraction,
   ) {
     this.autoFillOverlayVisibilityOptions = [
       {

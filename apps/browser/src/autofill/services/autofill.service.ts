@@ -1,7 +1,6 @@
 import { firstValueFrom } from "rxjs";
 
 import { EventCollectionService } from "@bitwarden/common/abstractions/event/event-collection.service";
-import { SettingsService } from "@bitwarden/common/abstractions/settings.service";
 import { UserVerificationService } from "@bitwarden/common/auth/abstractions/user-verification/user-verification.service.abstraction";
 import { AutofillSettingsServiceAbstraction } from "@bitwarden/common/autofill/services/autofill-settings.service";
 import { DomainSettingsServiceAbstraction } from "@bitwarden/common/autofill/services/domain-settings.service";
@@ -47,11 +46,10 @@ export default class AutofillService implements AutofillServiceInterface {
     private cipherService: CipherService,
     private stateService: BrowserStateService,
     private autofillSettingsService: AutofillSettingsServiceAbstraction,
-    private domainSettingsService: DomainSettingsServiceAbstraction,
     private totpService: TotpService,
     private eventCollectionService: EventCollectionService,
     private logService: LogService,
-    private settingsService: SettingsService,
+    private domainSettingsService: DomainSettingsServiceAbstraction,
     private userVerificationService: UserVerificationService,
   ) {}
 
@@ -591,7 +589,7 @@ export default class AutofillService implements AutofillServiceInterface {
     fillScript.savedUrls =
       login?.uris?.filter((u) => u.match != UriMatchType.Never).map((u) => u.uri) ?? [];
 
-    fillScript.untrustedIframe = this.inUntrustedIframe(pageDetails.url, options);
+    fillScript.untrustedIframe = await this.inUntrustedIframe(pageDetails.url, options);
 
     let passwordFields = AutofillService.loadPasswordFields(
       pageDetails,
@@ -1076,7 +1074,10 @@ export default class AutofillService implements AutofillServiceInterface {
    * @returns {boolean} `true` if the iframe is untrusted and a warning should be shown, `false` otherwise
    * @private
    */
-  private inUntrustedIframe(pageUrl: string, options: GenerateFillScriptOptions): boolean {
+  private async inUntrustedIframe(
+    pageUrl: string,
+    options: GenerateFillScriptOptions,
+  ): Promise<boolean> {
     // If the pageUrl (from the content script) matches the tabUrl (from the sender tab), we are not in an iframe
     // This also avoids a false positive if no URI is saved and the user triggers auto-fill anyway
     if (pageUrl === options.tabUrl) {
@@ -1086,8 +1087,7 @@ export default class AutofillService implements AutofillServiceInterface {
     // Check the pageUrl against cipher URIs using the configured match detection.
     // Remember: if we are in this function, the tabUrl already matches a saved URI for the login.
     // We need to verify the pageUrl also matches.
-    // @TODO
-    const equivalentDomains = this.settingsService.getEquivalentDomains(pageUrl);
+    const equivalentDomains = await this.domainSettingsService.getUrlEquivalentDomains(pageUrl);
     const matchesUri = options.cipher.login.matchesUri(
       pageUrl,
       equivalentDomains,

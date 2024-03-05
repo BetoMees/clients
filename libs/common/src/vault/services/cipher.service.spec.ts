@@ -4,7 +4,6 @@ import { of } from "rxjs";
 import { makeStaticByteArray } from "../../../spec/utils";
 import { ApiService } from "../../abstractions/api.service";
 import { SearchService } from "../../abstractions/search.service";
-import { SettingsService } from "../../abstractions/settings.service";
 import { AutofillSettingsService } from "../../autofill/services/autofill-settings.service";
 import { DomainSettingsService } from "../../autofill/services/domain-settings.service";
 import { ConfigServiceAbstraction } from "../../platform/abstractions/config/config.service.abstraction";
@@ -101,7 +100,6 @@ describe("Cipher Service", () => {
   const stateService = mock<StateService>();
   const autofillSettingsService = mock<AutofillSettingsService>();
   const domainSettingsService = mock<DomainSettingsService>();
-  const settingsService = mock<SettingsService>();
   const apiService = mock<ApiService>();
   const cipherFileUploadService = mock<CipherFileUploadService>();
   const i18nService = mock<I18nService>();
@@ -120,13 +118,12 @@ describe("Cipher Service", () => {
 
     cipherService = new CipherService(
       cryptoService,
-      settingsService,
+      domainSettingsService,
       apiService,
       i18nService,
       searchService,
       stateService,
       autofillSettingsService,
-      domainSettingsService,
       encryptService,
       cipherFileUploadService,
       configService,

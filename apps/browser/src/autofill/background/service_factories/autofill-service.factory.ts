@@ -7,10 +7,6 @@ import {
   eventCollectionServiceFactory,
 } from "../../../background/service-factories/event-collection-service.factory";
 import {
-  settingsServiceFactory,
-  SettingsServiceInitOptions,
-} from "../../../background/service-factories/settings-service.factory";
-import {
   CachedServices,
   factory,
   FactoryOptions,
@@ -52,7 +48,6 @@ export type AutoFillServiceInitOptions = AutoFillServiceOptions &
   TotpServiceInitOptions &
   EventCollectionServiceInitOptions &
   LogServiceInitOptions &
-  SettingsServiceInitOptions &
   UserVerificationServiceInitOptions &
   DomainSettingsServiceInitOptions;
 
@@ -69,11 +64,10 @@ export function autofillServiceFactory(
         await cipherServiceFactory(cache, opts),
         await stateServiceFactory(cache, opts),
         await autofillSettingsServiceFactory(cache, opts),
-        await domainSettingsServiceFactory(cache, opts),
         await totpServiceFactory(cache, opts),
         await eventCollectionServiceFactory(cache, opts),
         await logServiceFactory(cache, opts),
-        await settingsServiceFactory(cache, opts),
+        await domainSettingsServiceFactory(cache, opts),
         await userVerificationServiceFactory(cache, opts),
       ),
   );

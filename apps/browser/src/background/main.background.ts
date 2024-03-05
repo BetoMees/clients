@@ -617,13 +617,12 @@ export default class MainBackground {
 
     this.cipherService = new CipherService(
       this.cryptoService,
-      this.settingsService,
+      this.domainSettingsService,
       this.apiService,
       this.i18nService,
       this.searchService,
       this.stateService,
       this.autofillSettingsService,
-      this.domainSettingsService,
       this.encryptService,
       this.cipherFileUploadService,
       this.configService,
@@ -705,7 +704,7 @@ export default class MainBackground {
     this.providerService = new ProviderService(this.stateProvider);
     this.syncService = new SyncService(
       this.apiService,
-      this.settingsService,
+      this.domainSettingsService,
       this.folderService,
       this.cipherService,
       this.cryptoService,
@@ -739,11 +738,10 @@ export default class MainBackground {
       this.cipherService,
       this.stateService,
       this.autofillSettingsService,
-      this.domainSettingsService,
       this.totpService,
       this.eventCollectionService,
       this.logService,
-      this.settingsService,
+      this.domainSettingsService,
       this.userVerificationService,
     );
     this.auditService = new AuditService(this.cryptoFunctionService, this.apiService);
@@ -1109,7 +1107,6 @@ export default class MainBackground {
     await Promise.all([
       this.syncService.setLastSync(new Date(0), userId),
       this.cryptoService.clearKeys(userId),
-      this.settingsService.clear(userId),
       this.cipherService.clear(userId),
       this.folderService.clear(userId),
       this.collectionService.clear(userId),

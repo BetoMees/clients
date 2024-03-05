@@ -489,13 +489,12 @@ export class Main {
 
     this.cipherService = new CipherService(
       this.cryptoService,
-      this.settingsService,
+      this.domainSettingsService,
       this.apiService,
       this.i18nService,
       this.searchService,
       this.stateService,
       this.autofillSettingsService,
-      this.domainSettingsService,
       this.encryptService,
       this.cipherFileUploadService,
       this.configService,
@@ -560,7 +559,7 @@ export class Main {
 
     this.syncService = new SyncService(
       this.apiService,
-      this.settingsService,
+      this.domainSettingsService,
       this.folderService,
       this.cipherService,
       this.cryptoService,
@@ -656,7 +655,6 @@ export class Main {
     await Promise.all([
       this.syncService.setLastSync(new Date(0)),
       this.cryptoService.clearKeys(),
-      this.settingsService.clear(userId),
       this.cipherService.clear(userId),
       this.folderService.clear(userId),
       this.collectionService.clear(userId as UserId),

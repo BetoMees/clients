@@ -31,9 +31,6 @@ export type UserSettings = {
     utcDate: string;
     version: string;
   };
-  settings: {
-    equivalentDomains: string[][];
-  };
   vaultTimeout: number;
   vaultTimeoutAction: VaultTimeoutAction;
 };

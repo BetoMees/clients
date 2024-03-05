@@ -22,11 +22,7 @@ import { CipherView } from "../../vault/models/view/cipher.view";
 import { AddEditCipherInfo } from "../../vault/types/add-edit-cipher-info";
 import { KdfType, ThemeType } from "../enums";
 import { ServerConfigData } from "../models/data/server-config.data";
-import {
-  Account,
-  AccountDecryptionOptions,
-  AccountSettingsSettings,
-} from "../models/domain/account";
+import { Account, AccountDecryptionOptions } from "../models/domain/account";
 import { EncString } from "../models/domain/enc-string";
 import { StorageOptions } from "../models/domain/storage-options";
 import { SymmetricCryptoKey } from "../models/domain/symmetric-crypto-key";
@@ -295,8 +291,6 @@ export abstract class StateService<T extends Account = Account> {
    * @deprecated Do not call this directly, use SendService
    */
   setEncryptedSends: (value: { [id: string]: SendData }, options?: StorageOptions) => Promise<void>;
-  getEquivalentDomains: (options?: StorageOptions) => Promise<string[][]>;
-  setEquivalentDomains: (value: string, options?: StorageOptions) => Promise<void>;
   getEventCollection: (options?: StorageOptions) => Promise<EventData[]>;
   setEventCollection: (value: EventData[], options?: StorageOptions) => Promise<void>;
   getEverBeenUnlocked: (options?: StorageOptions) => Promise<boolean>;
@@ -371,14 +365,6 @@ export abstract class StateService<T extends Account = Account> {
   setRememberedEmail: (value: string, options?: StorageOptions) => Promise<void>;
   getSecurityStamp: (options?: StorageOptions) => Promise<string>;
   setSecurityStamp: (value: string, options?: StorageOptions) => Promise<void>;
-  /**
-   * @deprecated Do not call this directly, use SettingsService
-   */
-  getSettings: (options?: StorageOptions) => Promise<AccountSettingsSettings>;
-  /**
-   * @deprecated Do not call this directly, use SettingsService
-   */
-  setSettings: (value: AccountSettingsSettings, options?: StorageOptions) => Promise<void>;
   getTheme: (options?: StorageOptions) => Promise<ThemeType>;
   setTheme: (value: ThemeType, options?: StorageOptions) => Promise<void>;
   getTwoFactorToken: (options?: StorageOptions) => Promise<string>;

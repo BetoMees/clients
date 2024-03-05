@@ -6,7 +6,6 @@ import { DomainSettingsServiceAbstraction } from "@bitwarden/common/autofill/ser
 import { EventType } from "@bitwarden/common/enums";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { EventCollectionService } from "@bitwarden/common/services/event/event-collection.service";
-import { SettingsService } from "@bitwarden/common/services/settings.service";
 import {
   FieldType,
   LinkedIdType,
@@ -57,7 +56,6 @@ describe("AutofillService", () => {
   const totpService = mock<TotpService>();
   const eventCollectionService = mock<EventCollectionService>();
   const logService = mock<LogService>();
-  const settingsService = mock<SettingsService>();
   const userVerificationService = mock<UserVerificationService>();
 
   beforeEach(() => {
@@ -65,11 +63,10 @@ describe("AutofillService", () => {
       cipherService,
       stateService,
       autofillSettingsService,
-      domainSettingsService,
       totpService,
       eventCollectionService,
       logService,
-      settingsService,
+      domainSettingsService,
       userVerificationService,
     );
   });
@@ -2756,31 +2753,33 @@ describe("AutofillService", () => {
   });
 
   describe("inUntrustedIframe", () => {
-    it("returns a false value if the passed pageUrl is equal to the options tabUrl", () => {
+    it("returns a false value if the passed pageUrl is equal to the options tabUrl", async () => {
       const pageUrl = "https://www.example.com";
       const tabUrl = "https://www.example.com";
       const generateFillScriptOptions = createGenerateFillScriptOptionsMock({ tabUrl });
       generateFillScriptOptions.cipher.login.matchesUri = jest.fn().mockReturnValueOnce(true);
-      jest.spyOn(settingsService, "getEquivalentDomains");
+      jest.spyOn(domainSettingsService, "getUrlEquivalentDomains");
 
-      const result = autofillService["inUntrustedIframe"](pageUrl, generateFillScriptOptions);
+      const result = await autofillService["inUntrustedIframe"](pageUrl, generateFillScriptOptions);
 
-      expect(settingsService.getEquivalentDomains).not.toHaveBeenCalled();
+      expect(domainSettingsService.getUrlEquivalentDomains).not.toHaveBeenCalled();
       expect(generateFillScriptOptions.cipher.login.matchesUri).not.toHaveBeenCalled();
       expect(result).toBe(false);
     });
 
-    it("returns a false value if the passed pageUrl matches the domain of the tabUrl", () => {
+    it("returns a false value if the passed pageUrl matches the domain of the tabUrl", async () => {
       const pageUrl = "https://subdomain.example.com";
       const tabUrl = "https://www.example.com";
       const equivalentDomains = new Set(["example.com"]);
       const generateFillScriptOptions = createGenerateFillScriptOptionsMock({ tabUrl });
       generateFillScriptOptions.cipher.login.matchesUri = jest.fn().mockReturnValueOnce(true);
-      jest.spyOn(settingsService as any, "getEquivalentDomains").mockReturnValue(equivalentDomains);
+      jest
+        .spyOn(domainSettingsService as any, "getUrlEquivalentDomains")
+        .mockReturnValueOnce(equivalentDomains);
 
-      const result = autofillService["inUntrustedIframe"](pageUrl, generateFillScriptOptions);
+      const result = await autofillService["inUntrustedIframe"](pageUrl, generateFillScriptOptions);
 
-      expect(settingsService.getEquivalentDomains).toHaveBeenCalledWith(pageUrl);
+      expect(domainSettingsService.getUrlEquivalentDomains).toHaveBeenCalledWith(pageUrl);
       expect(generateFillScriptOptions.cipher.login.matchesUri).toHaveBeenCalledWith(
         pageUrl,
         equivalentDomains,
@@ -2789,17 +2788,19 @@ describe("AutofillService", () => {
       expect(result).toBe(false);
     });
 
-    it("returns a true value if the passed pageUrl does not match the domain of the tabUrl", () => {
+    it("returns a true value if the passed pageUrl does not match the domain of the tabUrl", async () => {
       const pageUrl = "https://subdomain.example.com";
       const tabUrl = "https://www.not-example.com";
       const equivalentDomains = new Set(["not-example.com"]);
       const generateFillScriptOptions = createGenerateFillScriptOptionsMock({ tabUrl });
       generateFillScriptOptions.cipher.login.matchesUri = jest.fn().mockReturnValueOnce(false);
-      jest.spyOn(settingsService as any, "getEquivalentDomains").mockReturnValue(equivalentDomains);
+      jest
+        .spyOn(domainSettingsService as any, "getUrlEquivalentDomains")
+        .mockReturnValue(equivalentDomains);
 
-      const result = autofillService["inUntrustedIframe"](pageUrl, generateFillScriptOptions);
+      const result = await autofillService["inUntrustedIframe"](pageUrl, generateFillScriptOptions);
 
-      expect(settingsService.getEquivalentDomains).toHaveBeenCalledWith(pageUrl);
+      expect(domainSettingsService.getUrlEquivalentDomains).toHaveBeenCalledWith(pageUrl);
       expect(generateFillScriptOptions.cipher.login.matchesUri).toHaveBeenCalledWith(
         pageUrl,
         equivalentDomains,

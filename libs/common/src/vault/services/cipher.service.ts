@@ -3,7 +3,6 @@ import { SemVer } from "semver";
 
 import { ApiService } from "../../abstractions/api.service";
 import { SearchService } from "../../abstractions/search.service";
-import { SettingsService } from "../../abstractions/settings.service";
 import { AutofillSettingsServiceAbstraction } from "../../autofill/services/autofill-settings.service";
 import { DomainSettingsServiceAbstraction } from "../../autofill/services/domain-settings.service";
 import { ErrorResponse } from "../../models/response/error.response";
@@ -62,13 +61,12 @@ export class CipherService implements CipherServiceAbstraction {
 
   constructor(
     private cryptoService: CryptoService,
-    private settingsService: SettingsService,
+    private domainSettingsService: DomainSettingsServiceAbstraction,
     private apiService: ApiService,
     private i18nService: I18nService,
     private searchService: SearchService,
     private stateService: StateService,
     private autofillSettingsService: AutofillSettingsServiceAbstraction,
-    private domainSettingsService: DomainSettingsServiceAbstraction,
     private encryptService: EncryptService,
     private cipherFileUploadService: CipherFileUploadService,
     private configService: ConfigServiceAbstraction,
@@ -363,8 +361,7 @@ export class CipherService implements CipherServiceAbstraction {
       return Promise.resolve([]);
     }
 
-    // @TODO
-    const equivalentDomains = this.settingsService.getEquivalentDomains(url);
+    const equivalentDomains = await this.domainSettingsService.getUrlEquivalentDomains(url);
     const ciphers = await this.getAllDecrypted();
     defaultMatch ??= await firstValueFrom(this.domainSettingsService.defaultUriMatchStrategy$);
 

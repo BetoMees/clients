@@ -205,7 +205,6 @@ export class AccountSettings {
   dontShowIdentitiesCurrentTab?: boolean;
   enableAlwaysOnTop?: boolean;
   enableBiometric?: boolean;
-  equivalentDomains?: any;
   minimizeOnCopyToClipboard?: boolean;
   passwordGenerationOptions?: PasswordGeneratorOptions;
   usernameGenerationOptions?: UsernameGeneratorOptions;
@@ -213,7 +212,6 @@ export class AccountSettings {
   pinKeyEncryptedUserKey?: EncryptedString;
   pinKeyEncryptedUserKeyEphemeral?: EncryptedString;
   protectedPin?: string;
-  settings?: AccountSettingsSettings; // TODO: Merge whatever is going on here into the AccountSettings model properly
   vaultTimeout?: number;
   vaultTimeoutAction?: string = "lock";
   serverConfig?: ServerConfigData;
@@ -238,10 +236,6 @@ export class AccountSettings {
     });
   }
 }
-
-export type AccountSettingsSettings = {
-  equivalentDomains?: string[][];
-};
 
 export class AccountTokens {
   accessToken?: string;

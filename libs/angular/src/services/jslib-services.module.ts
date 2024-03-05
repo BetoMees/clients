@@ -361,13 +361,12 @@ import { ModalService } from "./modal.service";
       ) =>
         new CipherService(
           cryptoService,
-          settingsService,
+          domainSettingsService,
           apiService,
           i18nService,
           searchService,
           stateService,
           autofillSettingsService,
-          domainSettingsService,
           encryptService,
           fileUploadService,
           configService,
