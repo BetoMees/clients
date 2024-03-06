@@ -4,7 +4,7 @@ import { firstValueFrom } from "rxjs";
 
 import { ControlsOf } from "@bitwarden/angular/types/controls-of";
 import {
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { PolicyType } from "@bitwarden/common/admin-console/enums";
@@ -64,7 +64,7 @@ export class MasterPasswordPolicyComponent extends BasePolicyComponent {
     const organization = await firstValueFrom(
       this.organizationService
         .organizations$()
-        .pipe(mapToSingleOrganization(this.policyResponse.organizationId as OrganizationId)),
+        .pipe(getById(this.policyResponse.organizationId as OrganizationId)),
     );
     this.showKeyConnectorInfo = organization.keyConnectorEnabled;
   }

@@ -5,7 +5,7 @@ import { concatMap, firstValueFrom, Subject, takeUntil } from "rxjs";
 import { UserNamePipe } from "@bitwarden/angular/pipes/user-name.pipe";
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import {
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { OrganizationUserService } from "@bitwarden/common/admin-console/abstractions/organization-user/organization-user.service";
@@ -73,7 +73,7 @@ export class EventsComponent extends BaseEventsComponent implements OnInit, OnDe
           this.organization = await firstValueFrom(
             this.organizationService
               .organizations$()
-              .pipe(mapToSingleOrganization(this.organizationId as OrganizationId)),
+              .pipe(getById(this.organizationId as OrganizationId)),
           );
           if (this.organization == null || !this.organization.useEvents) {
             await this.router.navigate(["/organizations", this.organizationId]);

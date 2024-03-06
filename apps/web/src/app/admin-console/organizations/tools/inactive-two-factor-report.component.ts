@@ -4,7 +4,7 @@ import { firstValueFrom } from "rxjs";
 
 import { ModalService } from "@bitwarden/angular/services/modal.service";
 import {
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
@@ -39,7 +39,7 @@ export class InactiveTwoFactorReportComponent extends BaseInactiveTwoFactorRepor
       this.organization = await firstValueFrom(
         this.organizationService
           .organizations$()
-          .pipe(mapToSingleOrganization(params.organizationId as OrganizationId)),
+          .pipe(getById(params.organizationId as OrganizationId)),
       );
       await super.ngOnInit();
     });

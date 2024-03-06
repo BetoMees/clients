@@ -5,7 +5,7 @@ import { firstValueFrom } from "rxjs";
 import { ModalService } from "@bitwarden/angular/services/modal.service";
 import { AuditService } from "@bitwarden/common/abstractions/audit.service";
 import {
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { OrganizationId } from "@bitwarden/common/types/guid";
@@ -42,7 +42,7 @@ export class ExposedPasswordsReportComponent extends BaseExposedPasswordsReportC
       this.organization = await firstValueFrom(
         this.organizationService
           .organizations$()
-          .pipe(mapToSingleOrganization(params.organizationId as OrganizationId)),
+          .pipe(getById(params.organizationId as OrganizationId)),
       );
       this.manageableCiphers = await this.cipherService.getAll();
     });

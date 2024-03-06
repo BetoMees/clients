@@ -13,7 +13,7 @@ import { ControlsOf } from "@bitwarden/angular/types/controls-of";
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { OrganizationApiServiceAbstraction } from "@bitwarden/common/admin-console/abstractions/organization/organization-api.service.abstraction";
 import {
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
@@ -252,7 +252,7 @@ export class SsoComponent implements OnInit, OnDestroy {
     this.organization = await firstValueFrom(
       this.organizationService
         .organizations$()
-        .pipe(mapToSingleOrganization(this.organizationId as OrganizationId)),
+        .pipe(getById(this.organizationId as OrganizationId)),
     );
     const ssoSettings = await this.organizationApiService.getSso(this.organizationId);
     this.populateForm(ssoSettings);

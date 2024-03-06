@@ -6,7 +6,7 @@ import { AuditService } from "@bitwarden/common/abstractions/audit.service";
 import { EventCollectionService } from "@bitwarden/common/abstractions/event/event-collection.service";
 import {
   mapToExcludeSpecialOrganizations,
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
@@ -590,7 +590,7 @@ export class AddEditComponent implements OnInit, OnDestroy {
       const org = await firstValueFrom(
         this.organizationService
           .organizations$()
-          .pipe(mapToSingleOrganization(this.cipher.organizationId as OrganizationId)),
+          .pipe(getById(this.cipher.organizationId as OrganizationId)),
       );
       if (org != null) {
         this.cipher.organizationUseTotp = org.useTotp;

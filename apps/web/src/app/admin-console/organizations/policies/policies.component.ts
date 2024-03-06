@@ -5,7 +5,7 @@ import { first } from "rxjs/operators";
 
 import { ModalService } from "@bitwarden/angular/services/modal.service";
 import {
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { PolicyApiServiceAbstraction } from "@bitwarden/common/admin-console/abstractions/policy/policy-api.service.abstraction";
@@ -52,7 +52,7 @@ export class PoliciesComponent implements OnInit {
       this.organization = await firstValueFrom(
         this.organizationService
           .organizations$()
-          .pipe(mapToSingleOrganization(this.organizationId as OrganizationId)),
+          .pipe(getById(this.organizationId as OrganizationId)),
       );
       this.policies = this.policyListService.getPolicies();
 

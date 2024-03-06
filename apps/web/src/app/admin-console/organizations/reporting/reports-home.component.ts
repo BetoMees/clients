@@ -3,7 +3,7 @@ import { ActivatedRoute, NavigationEnd, Router } from "@angular/router";
 import { filter, map, Observable, startWith, concatMap, firstValueFrom } from "rxjs";
 
 import {
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
@@ -39,7 +39,7 @@ export class ReportsHomeComponent implements OnInit {
           await firstValueFrom(
             this.organizationService
               .organizations$()
-              .pipe(mapToSingleOrganization(params.organizationId as OrganizationId)),
+              .pipe(getById(params.organizationId as OrganizationId)),
           ),
       ),
       map((org) => this.buildReports(org.isFreeOrg)),

@@ -4,7 +4,7 @@ import { firstValueFrom } from "rxjs";
 
 import {
   canAccessOrgAdmin,
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
@@ -27,7 +27,7 @@ export class OrganizationPermissionsGuard implements CanActivate {
 
   private async getOrg(organizationId: OrganizationId) {
     return await firstValueFrom(
-      this.organizationService.organizations$().pipe(mapToSingleOrganization(organizationId)),
+      this.organizationService.organizations$().pipe(getById(organizationId)),
     );
   }
 

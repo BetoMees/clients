@@ -11,7 +11,7 @@ import {
 } from "rxjs";
 
 import {
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
@@ -76,9 +76,7 @@ export class ProjectSecretsComponent {
         this.projectId = params.projectId;
         this.organizationEnabled = (
           await firstValueFrom(
-            this.organizationService
-              .organizations$()
-              .pipe(mapToSingleOrganization(params.organizationId)),
+            this.organizationService.organizations$().pipe(getById(params.organizationId)),
           )
         )?.enabled;
         return await this.getSecretsByProject();

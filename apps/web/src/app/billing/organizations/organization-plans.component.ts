@@ -14,7 +14,7 @@ import { firstValueFrom, Subject, takeUntil } from "rxjs";
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { OrganizationApiServiceAbstraction } from "@bitwarden/common/admin-console/abstractions/organization/organization-api.service.abstraction";
 import {
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
@@ -157,7 +157,7 @@ export class OrganizationPlansComponent implements OnInit, OnDestroy {
       this.organization = await firstValueFrom(
         this.organizationService
           .organizations$()
-          .pipe(mapToSingleOrganization(this.organizationId as OrganizationId)),
+          .pipe(getById(this.organizationId as OrganizationId)),
       );
       this.billing = await this.organizationApiService.getBilling(this.organizationId);
       this.sub = await this.organizationApiService.getSubscription(this.organizationId);

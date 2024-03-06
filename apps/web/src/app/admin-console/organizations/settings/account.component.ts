@@ -6,7 +6,7 @@ import { combineLatest, from, lastValueFrom, of, Subject, switchMap, takeUntil }
 import { ModalService } from "@bitwarden/angular/services/modal.service";
 import { OrganizationApiServiceAbstraction } from "@bitwarden/common/admin-console/abstractions/organization/organization-api.service.abstraction";
 import {
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { OrganizationCollectionManagementUpdateRequest } from "@bitwarden/common/admin-console/models/request/organization-collection-management-update.request";
@@ -110,7 +110,7 @@ export class AccountComponent {
         switchMap((params) =>
           this.organizationService
             .organizations$()
-            .pipe(mapToSingleOrganization(params.organizationId as OrganizationId)),
+            .pipe(getById(params.organizationId as OrganizationId)),
         ),
         switchMap((organization) => {
           return combineLatest([

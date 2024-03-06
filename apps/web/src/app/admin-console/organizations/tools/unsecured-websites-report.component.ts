@@ -4,7 +4,7 @@ import { firstValueFrom } from "rxjs";
 
 import { ModalService } from "@bitwarden/angular/services/modal.service";
 import {
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { OrganizationId } from "@bitwarden/common/types/guid";
@@ -37,7 +37,7 @@ export class UnsecuredWebsitesReportComponent extends BaseUnsecuredWebsitesRepor
       this.organization = await firstValueFrom(
         this.organizationService
           .organizations$()
-          .pipe(mapToSingleOrganization(params.organizationId as OrganizationId)),
+          .pipe(getById(params.organizationId as OrganizationId)),
       );
       await super.ngOnInit();
     });

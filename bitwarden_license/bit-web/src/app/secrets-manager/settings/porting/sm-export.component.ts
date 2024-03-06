@@ -4,7 +4,7 @@ import { ActivatedRoute } from "@angular/router";
 import { firstValueFrom, Subject, switchMap, takeUntil } from "rxjs";
 
 import {
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { FileDownloadService } from "@bitwarden/common/platform/abstractions/file-download/file-download.service";
@@ -53,9 +53,7 @@ export class SecretsManagerExportComponent implements OnInit, OnDestroy {
     this.route.params
       .pipe(
         switchMap((params) =>
-          this.organizationService
-            .organizations$()
-            .pipe(mapToSingleOrganization(params.organizationId)),
+          this.organizationService.organizations$().pipe(getById(params.organizationId)),
         ),
         takeUntil(this.destroy$),
       )

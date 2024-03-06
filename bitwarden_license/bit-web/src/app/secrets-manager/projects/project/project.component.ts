@@ -15,7 +15,7 @@ import {
 } from "rxjs";
 
 import {
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
@@ -81,7 +81,7 @@ export class ProjectComponent implements OnInit, OnDestroy {
       concatMap((params) =>
         this.organizationService
           .organizations$()
-          .pipe(mapToSingleOrganization(params.organizationId as OrganizationId)),
+          .pipe(getById(params.organizationId as OrganizationId)),
       ),
     );
 

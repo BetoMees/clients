@@ -4,7 +4,7 @@ import { firstValueFrom } from "rxjs";
 
 import {
   canAccessVaultTab,
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { OrganizationId } from "@bitwarden/common/types/guid";
@@ -47,9 +47,7 @@ export class OrgImportComponent implements OnInit {
    */
   protected async onSuccessfulImport(organizationId: string): Promise<void> {
     const organization = await firstValueFrom(
-      this.organizationService
-        .organizations$()
-        .pipe(mapToSingleOrganization(organizationId as OrganizationId)),
+      this.organizationService.organizations$().pipe(getById(organizationId as OrganizationId)),
     );
     if (organization == null) {
       return;

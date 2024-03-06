@@ -5,7 +5,7 @@ import { catchError, combineLatest, from, map, of, Subject, switchMap, takeUntil
 
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import {
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { OrganizationUserService } from "@bitwarden/common/admin-console/abstractions/organization-user/organization-user.service";
@@ -84,7 +84,7 @@ export const openGroupAddEditDialog = (
 })
 export class GroupAddEditComponent implements OnInit, OnDestroy {
   protected flexibleCollectionsEnabled$ = this.organizationService.organizations$().pipe(
-    mapToSingleOrganization(this.organizationId as OrganizationId),
+    getById(this.organizationId as OrganizationId),
     map((o) => o?.flexibleCollections),
   );
 

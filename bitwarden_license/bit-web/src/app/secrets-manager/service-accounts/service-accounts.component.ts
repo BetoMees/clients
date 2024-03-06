@@ -3,7 +3,7 @@ import { ActivatedRoute } from "@angular/router";
 import { combineLatest, firstValueFrom, Observable, startWith, switchMap } from "rxjs";
 
 import {
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { OrganizationId } from "@bitwarden/common/types/guid";
@@ -54,7 +54,7 @@ export class ServiceAccountsComponent implements OnInit {
           await firstValueFrom(
             this.organizationService
               .organizations$()
-              .pipe(mapToSingleOrganization(params.organizationId as OrganizationId)),
+              .pipe(getById(params.organizationId as OrganizationId)),
           )
         )?.enabled;
 

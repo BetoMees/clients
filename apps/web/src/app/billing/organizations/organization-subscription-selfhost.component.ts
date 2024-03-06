@@ -6,7 +6,7 @@ import { concatMap, Subject, takeUntil } from "rxjs";
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { OrganizationApiServiceAbstraction } from "@bitwarden/common/admin-console/abstractions/organization/organization-api.service.abstraction";
 import {
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { OrganizationConnectionType } from "@bitwarden/common/admin-console/enums";
@@ -116,10 +116,7 @@ export class OrganizationSubscriptionSelfhostComponent implements OnInit, OnDest
     this.loading = true;
     this.organizationService
       .organizations$()
-      .pipe(
-        mapToSingleOrganization(this.organizationId as OrganizationId),
-        takeUntil(this.destroy$),
-      )
+      .pipe(getById(this.organizationId as OrganizationId), takeUntil(this.destroy$))
       .subscribe((org) => {
         this.userOrg = org;
       });

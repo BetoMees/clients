@@ -3,7 +3,7 @@ import { ActivatedRouteSnapshot, CanActivateFn, createUrlTreeFromSnapshot } from
 import { firstValueFrom } from "rxjs";
 
 import {
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { OrganizationId } from "@bitwarden/common/types/guid";
@@ -22,9 +22,7 @@ export const organizationEnabledGuard: CanActivateFn = async (route: ActivatedRo
   }
 
   const org = await firstValueFrom(
-    orgService
-      .organizations$()
-      .pipe(mapToSingleOrganization(route.params.organizationId as OrganizationId)),
+    orgService.organizations$().pipe(getById(route.params.organizationId as OrganizationId)),
   );
   if (org == null || !org.canAccessSecretsManager) {
     return createUrlTreeFromSnapshot(route, ["/"]);

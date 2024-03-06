@@ -4,7 +4,7 @@ import { FormControl, FormGroup, Validators } from "@angular/forms";
 import { lastValueFrom, Subject, takeUntil } from "rxjs";
 
 import {
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
@@ -93,10 +93,7 @@ export class SecretDialogComponent implements OnInit {
 
     this.organizationService
       .organizations$()
-      .pipe(
-        mapToSingleOrganization(this.data.organizationId as OrganizationId),
-        takeUntil(this.destroy$),
-      )
+      .pipe(getById(this.data.organizationId as OrganizationId), takeUntil(this.destroy$))
       .subscribe((org) => {
         if (org?.isAdmin) {
           this.formGroup.get("project").removeValidators(Validators.required);

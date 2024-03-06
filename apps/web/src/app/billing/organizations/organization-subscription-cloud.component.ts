@@ -5,7 +5,7 @@ import { concatMap, firstValueFrom, lastValueFrom, Observable, Subject, takeUnti
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { OrganizationApiServiceAbstraction } from "@bitwarden/common/admin-console/abstractions/organization/organization-api.service.abstraction";
 import {
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { OrganizationApiKeyType } from "@bitwarden/common/admin-console/enums";
@@ -100,10 +100,7 @@ export class OrganizationSubscriptionCloudComponent implements OnInit, OnDestroy
     this.loading = true;
     this.organizationService
       .organizations$()
-      .pipe(
-        mapToSingleOrganization(this.organizationId as OrganizationId),
-        takeUntil(this.destroy$),
-      )
+      .pipe(getById(this.organizationId as OrganizationId), takeUntil(this.destroy$))
       .subscribe((org) => {
         this.userOrg = org;
       });

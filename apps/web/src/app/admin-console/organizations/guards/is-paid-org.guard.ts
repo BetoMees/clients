@@ -3,7 +3,7 @@ import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot } from
 import { firstValueFrom } from "rxjs";
 
 import {
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
@@ -22,9 +22,7 @@ export class IsPaidOrgGuard implements CanActivate {
 
   async canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
     const org = await firstValueFrom(
-      this.organizationService
-        .organizations$()
-        .pipe(mapToSingleOrganization(route.params.organizationId)),
+      this.organizationService.organizations$().pipe(getById(route.params.organizationId)),
     );
 
     if (org == null) {

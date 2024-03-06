@@ -3,7 +3,7 @@ import { firstValueFrom } from "rxjs";
 
 import {
   mapToBooleanHasAnyOrganizations,
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
@@ -62,7 +62,7 @@ export class ExportScopeCalloutComponent implements OnInit {
               await firstValueFrom(
                 this.organizationService
                   .organizations$()
-                  .pipe(mapToSingleOrganization(organizationId as OrganizationId)),
+                  .pipe(getById(organizationId as OrganizationId)),
               )
             ).name,
           }

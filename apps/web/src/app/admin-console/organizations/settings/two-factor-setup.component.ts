@@ -6,7 +6,7 @@ import { tap } from "rxjs/operators";
 import { ModalService } from "@bitwarden/angular/services/modal.service";
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import {
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
@@ -45,7 +45,7 @@ export class TwoFactorSetupComponent extends BaseTwoFactorSetupComponent {
           this.organization = await firstValueFrom(
             this.organizationService
               .organizations$()
-              .pipe(mapToSingleOrganization(this.organizationId as OrganizationId)),
+              .pipe(getById(this.organizationId as OrganizationId)),
           );
         }),
         concatMap(async () => await super.ngOnInit()),

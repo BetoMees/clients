@@ -4,7 +4,7 @@ import { firstValueFrom } from "rxjs";
 
 import {
   canAccessOrgAdmin,
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { OrganizationId } from "@bitwarden/common/types/guid";
@@ -22,7 +22,7 @@ export class OrganizationRedirectGuard implements CanActivate {
     const org = await firstValueFrom(
       this.organizationService
         .organizations$()
-        .pipe(mapToSingleOrganization(route.params.organizationId as OrganizationId)),
+        .pipe(getById(route.params.organizationId as OrganizationId)),
     );
 
     const customRedirect = route.data?.autoRedirectCallback;

@@ -36,7 +36,7 @@ import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { EventCollectionService } from "@bitwarden/common/abstractions/event/event-collection.service";
 import { SearchService } from "@bitwarden/common/abstractions/search.service";
 import {
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
@@ -206,9 +206,7 @@ export class VaultComponent implements OnInit, OnDestroy {
 
     const organization$ = organizationId$.pipe(
       switchMap((organizationId) =>
-        this.organizationService
-          .organizations$()
-          .pipe(mapToSingleOrganization(organizationId as OrganizationId)),
+        this.organizationService.organizations$().pipe(getById(organizationId as OrganizationId)),
       ),
       takeUntil(this.destroy$),
       shareReplay({ refCount: false, bufferSize: 1 }),

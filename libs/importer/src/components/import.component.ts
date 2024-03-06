@@ -20,7 +20,7 @@ import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import {
   canAccessImport,
   mapToExcludeSpecialOrganizations,
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
@@ -124,10 +124,7 @@ export class ImportComponent implements OnInit, OnDestroy {
     this._organizationId = value;
     this.organizationService
       .organizations$()
-      .pipe(
-        mapToSingleOrganization(this._organizationId as OrganizationId),
-        takeUntil(this.destroy$),
-      )
+      .pipe(getById(this._organizationId as OrganizationId), takeUntil(this.destroy$))
       .subscribe((organization) => {
         this._organizationId = organization?.id;
         this.organization = organization;
@@ -394,7 +391,7 @@ export class ImportComponent implements OnInit, OnDestroy {
       await firstValueFrom(
         this.organizationService
           .organizations$()
-          .pipe(mapToSingleOrganization(this.organizationId as OrganizationId)),
+          .pipe(getById(this.organizationId as OrganizationId)),
       )
     )?.canAccessImportExport;
   }

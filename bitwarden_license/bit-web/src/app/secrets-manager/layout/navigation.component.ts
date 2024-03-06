@@ -3,7 +3,7 @@ import { ActivatedRoute } from "@angular/router";
 import { firstValueFrom, map } from "rxjs";
 
 import {
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
@@ -24,7 +24,7 @@ export class NavigationComponent {
           await firstValueFrom(
             this.organizationService
               .organizations$()
-              .pipe(mapToSingleOrganization(params.organizationId as OrganizationId)),
+              .pipe(getById(params.organizationId as OrganizationId)),
           )
         )?.isAdmin,
     ),

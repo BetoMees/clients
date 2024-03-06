@@ -15,7 +15,7 @@ import {
 import { first } from "rxjs/operators";
 
 import {
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { OrganizationUserService } from "@bitwarden/common/admin-console/abstractions/organization-user/organization-user.service";
@@ -145,10 +145,7 @@ export class CollectionDialogComponent implements OnInit, OnDestroy {
   async loadOrg(orgId: string, collectionIds: string[]) {
     const organization$ = this.organizationService
       .organizations$()
-      .pipe(
-        mapToSingleOrganization(orgId as OrganizationId),
-        shareReplay({ refCount: true, bufferSize: 1 }),
-      );
+      .pipe(getById(orgId as OrganizationId), shareReplay({ refCount: true, bufferSize: 1 }));
     const groups$ = organization$.pipe(
       switchMap((organization) => {
         if (!organization.useGroups) {

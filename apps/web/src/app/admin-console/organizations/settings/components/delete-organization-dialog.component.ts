@@ -5,7 +5,7 @@ import { combineLatest, Subject, takeUntil } from "rxjs";
 
 import { OrganizationApiServiceAbstraction } from "@bitwarden/common/admin-console/abstractions/organization/organization-api.service.abstraction";
 import {
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
@@ -111,7 +111,7 @@ export class DeleteOrganizationDialogComponent implements OnInit, OnDestroy {
     combineLatest([
       this.organizationService
         .organizations$()
-        .pipe(mapToSingleOrganization(this.params.organizationId as OrganizationId)),
+        .pipe(getById(this.params.organizationId as OrganizationId)),
       this.cipherService.getAllFromApiForOrganization(this.params.organizationId),
     ])
       .pipe(takeUntil(this.destroy$))

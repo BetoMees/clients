@@ -3,7 +3,7 @@ import { ActivatedRoute } from "@angular/router";
 import { concatMap, map } from "rxjs";
 
 import {
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { OrganizationId } from "@bitwarden/common/types/guid";
@@ -23,7 +23,7 @@ export class OrgSuspendedComponent {
     concatMap((params) =>
       this.organizationService
         .organizations$()
-        .pipe(mapToSingleOrganization(params.organizationId as OrganizationId)),
+        .pipe(getById(params.organizationId as OrganizationId)),
     ),
     map((org) => org?.name),
   );

@@ -34,7 +34,7 @@ import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { EventCollectionService } from "@bitwarden/common/abstractions/event/event-collection.service";
 import { SearchService } from "@bitwarden/common/abstractions/search.service";
 import {
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
@@ -527,7 +527,7 @@ export class VaultComponent implements OnInit, OnDestroy {
       const org = await firstValueFrom(
         this.organizationService
           .organizations$()
-          .pipe(mapToSingleOrganization(cipher.organizationId as OrganizationId)),
+          .pipe(getById(cipher.organizationId as OrganizationId)),
       );
       if (org != null && (org.maxStorageGb == null || org.maxStorageGb === 0)) {
         this.messagingService.send("upgradeOrganization", {
@@ -710,7 +710,7 @@ export class VaultComponent implements OnInit, OnDestroy {
     const organization = await firstValueFrom(
       this.organizationService
         .organizations$()
-        .pipe(mapToSingleOrganization(collection.organizationId as OrganizationId)),
+        .pipe(getById(collection.organizationId as OrganizationId)),
     );
     if (!collection.canDelete(organization)) {
       this.platformUtilsService.showToast(

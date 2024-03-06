@@ -11,7 +11,7 @@ import { firstValueFrom } from "rxjs";
 
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import {
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { PaymentMethodType } from "@bitwarden/common/billing/enums";
@@ -73,7 +73,7 @@ export class AddCreditComponent implements OnInit {
       const org = await firstValueFrom(
         this.organizationService
           .organizations$()
-          .pipe(mapToSingleOrganization(this.organizationId as OrganizationId)),
+          .pipe(getById(this.organizationId as OrganizationId)),
       );
       if (org != null) {
         this.subject = org.name;

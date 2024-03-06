@@ -114,7 +114,7 @@ export function mapToBooleanHasAnyOrganizations() {
  * @returns a function that can be used in `Observable<Organization[]>` pipes,
  * like `organizationService.organizations$`
  */
-export function mapToSingleOrganization(organizationId: OrganizationId) {
+export function getById(organizationId: OrganizationId) {
   return map<Organization[], Organization>((orgs) => orgs?.find((o) => o.id === organizationId));
 }
 

@@ -4,7 +4,7 @@ import { FormBuilder, Validators } from "@angular/forms";
 import { combineLatest, of, shareReplay, Subject, switchMap, takeUntil } from "rxjs";
 
 import {
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { OrganizationUserService } from "@bitwarden/common/admin-console/abstractions/organization-user/organization-user.service";
@@ -153,12 +153,9 @@ export class MemberDialogComponent implements OnInit, OnDestroy {
 
     const organization$ = this.organizationService
       .organizations$()
-      .pipe(
-        mapToSingleOrganization(organizationId),
-        shareReplay({ refCount: true, bufferSize: 1 }),
-      );
+      .pipe(getById(organizationId), shareReplay({ refCount: true, bufferSize: 1 }));
     const groups$ = this.organizationService.organizations$().pipe(
-      mapToSingleOrganization(organizationId),
+      getById(organizationId),
       switchMap((organization) => {
         if (!organization.useGroups) {
           return of([] as GroupView[]);

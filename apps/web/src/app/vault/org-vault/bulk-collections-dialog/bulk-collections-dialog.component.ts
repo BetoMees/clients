@@ -4,7 +4,7 @@ import { FormBuilder } from "@angular/forms";
 import { combineLatest, map, of, Subject, switchMap, takeUntil } from "rxjs";
 
 import {
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { OrganizationUserService } from "@bitwarden/common/admin-console/abstractions/organization-user/organization-user.service";
@@ -48,7 +48,7 @@ export enum BulkCollectionsDialogResult {
 export class BulkCollectionsDialogComponent implements OnDestroy {
   protected flexibleCollectionsEnabled$ = this.organizationService
     .organizations$()
-    .pipe(mapToSingleOrganization(this.params.organizationId as OrganizationId))
+    .pipe(getById(this.params.organizationId as OrganizationId))
     .pipe(map((o) => o?.flexibleCollections));
 
   protected readonly PermissionMode = PermissionMode;
@@ -77,7 +77,7 @@ export class BulkCollectionsDialogComponent implements OnDestroy {
     this.numCollections = this.params.collections.length;
     const organization$ = this.organizationService
       .organizations$()
-      .pipe(mapToSingleOrganization(this.params.organizationId as OrganizationId));
+      .pipe(getById(this.params.organizationId as OrganizationId));
     const groups$ = organization$.pipe(
       switchMap((organization) => {
         if (!organization.useGroups) {

@@ -10,7 +10,7 @@ import {
 } from "rxjs";
 
 import {
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { DialogService } from "@bitwarden/components";
@@ -63,9 +63,7 @@ export class ProjectsComponent implements OnInit {
         this.organizationId = params.organizationId;
         this.organizationEnabled = (
           await firstValueFrom(
-            this.organizationService
-              .organizations$()
-              .pipe(mapToSingleOrganization(params.organizationId)),
+            this.organizationService.organizations$().pipe(getById(params.organizationId)),
           )
         )?.enabled;
 

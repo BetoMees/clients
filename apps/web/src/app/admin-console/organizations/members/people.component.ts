@@ -21,7 +21,7 @@ import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { SearchService } from "@bitwarden/common/abstractions/search.service";
 import { OrganizationApiServiceAbstraction } from "@bitwarden/common/admin-console/abstractions/organization/organization-api.service.abstraction";
 import {
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { OrganizationUserService } from "@bitwarden/common/admin-console/abstractions/organization-user/organization-user.service";
@@ -150,7 +150,7 @@ export class PeopleComponent
       concatMap((params) =>
         this.organizationService
           .organizations$()
-          .pipe(mapToSingleOrganization(params.organizationId as OrganizationId)),
+          .pipe(getById(params.organizationId as OrganizationId)),
       ),
       shareReplay({ refCount: true, bufferSize: 1 }),
     );

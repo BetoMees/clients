@@ -11,7 +11,7 @@ import {
   canAccessReportingTab,
   canAccessSettingsTab,
   canAccessVaultTab,
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
@@ -66,7 +66,7 @@ export class OrganizationLayoutComponent implements OnInit, OnDestroy {
           return this.organizationService
             .organizations$()
             .pipe(takeUntil(this._destroy))
-            .pipe(mapToSingleOrganization(id as OrganizationId));
+            .pipe(getById(id as OrganizationId));
         }),
       );
 
