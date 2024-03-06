@@ -3,10 +3,10 @@ import { mock, mockReset } from "jest-mock-extended";
 import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authentication-status";
 import { AuthService } from "@bitwarden/common/auth/services/auth.service";
 import { AutofillSettingsService } from "@bitwarden/common/autofill/services/autofill-settings.service";
+import { DomainSettingsServiceAbstraction } from "@bitwarden/common/autofill/services/domain-settings.service";
 import { ThemeType } from "@bitwarden/common/platform/enums";
 import { EnvironmentService } from "@bitwarden/common/platform/services/environment.service";
 import { I18nService } from "@bitwarden/common/platform/services/i18n.service";
-import { SettingsService } from "@bitwarden/common/services/settings.service";
 import { CipherType } from "@bitwarden/common/vault/enums";
 import { CipherRepromptType } from "@bitwarden/common/vault/enums/cipher-reprompt-type";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
@@ -46,7 +46,7 @@ describe("OverlayBackground", () => {
   const environmentService = mock<EnvironmentService>({
     getIconsUrl: () => iconServerUrl,
   });
-  const settingsService = mock<SettingsService>();
+  const domainSettingsService = mock<DomainSettingsServiceAbstraction>();
   const stateService = mock<BrowserStateService>();
   const autofillSettingsService = mock<AutofillSettingsService>();
   const i18nService = mock<I18nService>();
@@ -72,7 +72,7 @@ describe("OverlayBackground", () => {
       autofillService,
       authService,
       environmentService,
-      settingsService,
+      domainSettingsService,
       stateService,
       autofillSettingsService,
       i18nService,

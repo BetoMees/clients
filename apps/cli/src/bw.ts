@@ -86,7 +86,6 @@ import { AuditService } from "@bitwarden/common/services/audit.service";
 import { EventCollectionService } from "@bitwarden/common/services/event/event-collection.service";
 import { EventUploadService } from "@bitwarden/common/services/event/event-upload.service";
 import { SearchService } from "@bitwarden/common/services/search.service";
-import { SettingsService } from "@bitwarden/common/services/settings.service";
 import { VaultTimeoutSettingsService } from "@bitwarden/common/services/vault-timeout/vault-timeout-settings.service";
 import { VaultTimeoutService } from "@bitwarden/common/services/vault-timeout/vault-timeout.service";
 import {
@@ -155,7 +154,6 @@ export class Main {
   appIdService: AppIdService;
   apiService: NodeApiService;
   environmentService: EnvironmentService;
-  settingsService: SettingsService;
   cipherService: CipherService;
   folderService: InternalFolderService;
   organizationUserService: OrganizationUserService;
@@ -361,7 +359,6 @@ export class Main {
 
     this.containerService = new ContainerService(this.cryptoService, this.encryptService);
 
-    this.settingsService = new SettingsService(this.stateService);
     this.domainSettingsService = new DomainSettingsService(this.stateProvider);
 
     this.fileUploadService = new FileUploadService(this.logService);
