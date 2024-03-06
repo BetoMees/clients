@@ -4,15 +4,10 @@ import { UserVerificationService } from "@bitwarden/common/auth/services/user-ve
 import { AutofillSettingsService } from "@bitwarden/common/autofill/services/autofill-settings.service";
 import { DomainSettingsServiceAbstraction } from "@bitwarden/common/autofill/services/domain-settings.service";
 import { EventType } from "@bitwarden/common/enums";
+import { UriMatchStrategy } from "@bitwarden/common/models/domain/domain-service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { EventCollectionService } from "@bitwarden/common/services/event/event-collection.service";
-import {
-  FieldType,
-  LinkedIdType,
-  LoginLinkedId,
-  UriMatchType,
-  CipherType,
-} from "@bitwarden/common/vault/enums";
+import { FieldType, LinkedIdType, LoginLinkedId, CipherType } from "@bitwarden/common/vault/enums";
 import { CipherRepromptType } from "@bitwarden/common/vault/enums/cipher-reprompt-type";
 import { CardView } from "@bitwarden/common/vault/models/view/card.view";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
@@ -1489,7 +1484,7 @@ describe("AutofillService", () => {
       };
       defaultLoginUriView = mock<LoginUriView>({
         uri: "https://www.example.com",
-        match: UriMatchType.Domain,
+        match: UriMatchStrategy.Domain,
       });
       options = createGenerateFillScriptOptionsMock();
       options.cipher.login = mock<LoginView>({
@@ -1560,13 +1555,13 @@ describe("AutofillService", () => {
         ]);
       });
 
-      it("skips adding any login uri views that have a UriMatchType of Never to the list of saved urls", async () => {
+      it("skips adding any login uri views that have a UriMatchStrategySetting of Never to the list of saved urls", async () => {
         const secondUriView = mock<LoginUriView>({
           uri: "https://www.second-example.com",
         });
         const thirdUriView = mock<LoginUriView>({
           uri: "https://www.third-example.com",
-          match: UriMatchType.Never,
+          match: UriMatchStrategy.Never,
         });
         options.cipher.login.uris = [defaultLoginUriView, secondUriView, thirdUriView];
 

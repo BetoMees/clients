@@ -7,12 +7,15 @@ import { AutofillSettingsServiceAbstraction } from "@bitwarden/common/autofill/s
 import { BadgeSettingsServiceAbstraction } from "@bitwarden/common/autofill/services/badge-settings.service";
 import { DomainSettingsServiceAbstraction } from "@bitwarden/common/autofill/services/domain-settings.service";
 import { UserNotificationSettingsServiceAbstraction } from "@bitwarden/common/autofill/services/user-notification-settings.service";
+import {
+  UriMatchStrategy,
+  UriMatchStrategySetting,
+} from "@bitwarden/common/models/domain/domain-service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
 import { ThemeType } from "@bitwarden/common/platform/enums";
 import { VaultSettingsService } from "@bitwarden/common/vault/abstractions/vault-settings/vault-settings.service";
-import { UriMatchType } from "@bitwarden/common/vault/enums";
 
 import { ClearClipboardDelaySetting } from "../../../../../apps/browser/src/autofill/constants";
 import { enableAccountSwitching } from "../../platform/flags";
@@ -37,7 +40,7 @@ export class OptionsComponent implements OnInit {
   showClearClipboard = true;
   theme: ThemeType;
   themeOptions: any[];
-  defaultUriMatch = UriMatchType.Domain;
+  defaultUriMatch: UriMatchStrategySetting = UriMatchStrategy.Domain;
   uriMatchOptions: any[];
   clearClipboard: ClearClipboardDelaySetting;
   clearClipboardOptions: any[];
@@ -66,12 +69,12 @@ export class OptionsComponent implements OnInit {
       { name: i18nService.t("solarizedDark"), value: ThemeType.SolarizedDark },
     ];
     this.uriMatchOptions = [
-      { name: i18nService.t("baseDomain"), value: UriMatchType.Domain },
-      { name: i18nService.t("host"), value: UriMatchType.Host },
-      { name: i18nService.t("startsWith"), value: UriMatchType.StartsWith },
-      { name: i18nService.t("regEx"), value: UriMatchType.RegularExpression },
-      { name: i18nService.t("exact"), value: UriMatchType.Exact },
-      { name: i18nService.t("never"), value: UriMatchType.Never },
+      { name: i18nService.t("baseDomain"), value: UriMatchStrategy.Domain },
+      { name: i18nService.t("host"), value: UriMatchStrategy.Host },
+      { name: i18nService.t("startsWith"), value: UriMatchStrategy.StartsWith },
+      { name: i18nService.t("regEx"), value: UriMatchStrategy.RegularExpression },
+      { name: i18nService.t("exact"), value: UriMatchStrategy.Exact },
+      { name: i18nService.t("never"), value: UriMatchStrategy.Never },
     ];
     this.clearClipboardOptions = [
       { name: i18nService.t("never"), value: null },
@@ -125,7 +128,7 @@ export class OptionsComponent implements OnInit {
     const defaultUriMatch = await firstValueFrom(
       this.domainSettingsService.defaultUriMatchStrategy$,
     );
-    this.defaultUriMatch = defaultUriMatch == null ? UriMatchType.Domain : defaultUriMatch;
+    this.defaultUriMatch = defaultUriMatch == null ? UriMatchStrategy.Domain : defaultUriMatch;
 
     this.clearClipboard = await firstValueFrom(this.autofillSettingsService.clearClipboardDelay$);
   }

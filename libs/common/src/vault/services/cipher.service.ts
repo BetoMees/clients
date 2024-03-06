@@ -5,6 +5,7 @@ import { ApiService } from "../../abstractions/api.service";
 import { SearchService } from "../../abstractions/search.service";
 import { AutofillSettingsServiceAbstraction } from "../../autofill/services/autofill-settings.service";
 import { DomainSettingsServiceAbstraction } from "../../autofill/services/domain-settings.service";
+import { UriMatchStrategySetting } from "../../models/domain/domain-service";
 import { ErrorResponse } from "../../models/response/error.response";
 import { ListResponse } from "../../models/response/list.response";
 import { View } from "../../models/view/view";
@@ -23,7 +24,7 @@ import { SymmetricCryptoKey } from "../../platform/models/domain/symmetric-crypt
 import { UserKey, OrgKey } from "../../types/key";
 import { CipherService as CipherServiceAbstraction } from "../abstractions/cipher.service";
 import { CipherFileUploadService } from "../abstractions/file-upload/cipher-file-upload.service";
-import { FieldType, UriMatchType } from "../enums";
+import { FieldType } from "../enums";
 import { CipherType } from "../enums/cipher-type";
 import { CipherData } from "../models/data/cipher.data";
 import { Attachment } from "../models/domain/attachment";
@@ -355,7 +356,7 @@ export class CipherService implements CipherServiceAbstraction {
   async getAllDecryptedForUrl(
     url: string,
     includeOtherTypes?: CipherType[],
-    defaultMatch: UriMatchType = null,
+    defaultMatch: UriMatchStrategySetting = null,
   ): Promise<CipherView[]> {
     if (url == null && includeOtherTypes == null) {
       return Promise.resolve([]);
