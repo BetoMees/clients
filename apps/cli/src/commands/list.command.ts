@@ -4,7 +4,7 @@ import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { EventCollectionService } from "@bitwarden/common/abstractions/event/event-collection.service";
 import { SearchService } from "@bitwarden/common/abstractions/search.service";
 import {
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { OrganizationUserService } from "@bitwarden/common/admin-console/abstractions/organization-user/organization-user.service";
@@ -189,7 +189,7 @@ export class ListCommand {
     const organization = await firstValueFrom(
       this.organizationService
         .organizations$()
-        .pipe(mapToSingleOrganization(options.organizationId as OrganizationId)),
+        .pipe(getById(options.organizationId as OrganizationId)),
     );
     if (organization == null) {
       return Response.error("Organization not found.");
@@ -226,7 +226,7 @@ export class ListCommand {
     const organization = await firstValueFrom(
       this.organizationService
         .organizations$()
-        .pipe(mapToSingleOrganization(options.organizationId as OrganizationId)),
+        .pipe(getById(options.organizationId as OrganizationId)),
     );
     if (organization == null) {
       return Response.error("Organization not found.");

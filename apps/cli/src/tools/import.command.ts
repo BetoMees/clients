@@ -3,7 +3,7 @@ import * as inquirer from "inquirer";
 import { firstValueFrom } from "rxjs";
 
 import {
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { OrganizationId } from "@bitwarden/common/types/guid";
@@ -25,9 +25,7 @@ export class ImportCommand {
     const organizationId = options.organizationid;
     if (organizationId != null) {
       const organization = await firstValueFrom(
-        this.organizationService
-          .organizations$()
-          .pipe(mapToSingleOrganization(organizationId as OrganizationId)),
+        this.organizationService.organizations$().pipe(getById(organizationId as OrganizationId)),
       );
 
       if (organization == null) {

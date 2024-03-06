@@ -5,7 +5,7 @@ import { AuditService } from "@bitwarden/common/abstractions/audit.service";
 import { EventCollectionService } from "@bitwarden/common/abstractions/event/event-collection.service";
 import { SearchService } from "@bitwarden/common/abstractions/search.service";
 import {
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
@@ -460,9 +460,7 @@ export class GetCommand extends DownloadCommand {
     let org: Organization = null;
     if (Utils.isGuid(id)) {
       org = await firstValueFrom(
-        this.organizationService
-          .organizations$()
-          .pipe(mapToSingleOrganization(id as OrganizationId)),
+        this.organizationService.organizations$().pipe(getById(id as OrganizationId)),
       );
     } else if (id.trim() !== "") {
       let orgs = await firstValueFrom(this.organizationService.organizations$());

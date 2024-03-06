@@ -3,7 +3,7 @@ import { ActivatedRoute } from "@angular/router";
 import { Observable, switchMap } from "rxjs";
 
 import {
-  mapToSingleOrganization,
+  getById,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
@@ -28,7 +28,7 @@ export class SettingsComponent implements OnInit {
       switchMap((params) =>
         this.organizationService
           .organizations$(params.organizationId)
-          .pipe(mapToSingleOrganization(params.organizationId as OrganizationId)),
+          .pipe(getById(params.organizationId as OrganizationId)),
       ),
     );
   }
